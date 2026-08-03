@@ -263,117 +263,181 @@ placeholder="Search Entry, Factory, Model, ETA...">
 
 <section id="containersPage" style="display:none;">
 
-<h2>Containers</h2>
+    <h2>Containers</h2>
 
-<div class="kpi-grid">
+    <!-- KPI Cards -->
 
-<div class="kpi-card">
+    <div class="kpi-grid">
 
-<div class="kpi-value" id="containerTotal">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Total Containers</div>
+            <div class="kpi-value" id="containerTotal">0</div>
 
-</div>
+            <div class="kpi-title">Total Containers</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerReceived">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Received Containers</div>
+            <div class="kpi-value" id="containerReceived">0</div>
 
-</div>
+            <div class="kpi-title">Received Containers</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerWaiting">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Not Received</div>
+            <div class="kpi-value" id="containerWaiting">0</div>
 
-</div>
+            <div class="kpi-title">Not Received</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerDistributed">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Waiting Distribution</div>
+            <div class="kpi-value" id="containerDistributed">0</div>
 
-</div>
+            <div class="kpi-title">Not Distributed</div>
 
-</div>
+        </div>
 
-<div class="table-toolbar">
+    </div>
 
-    <input
-        type="text"
-        id="containerSearch"
-        placeholder="Search Container, Entry, Model...">
+    <!-- Charts -->
 
-    <select id="warehouseFilter">
-        <option value="">All Warehouses</option>
-    </select>
+<div class="charts-grid">
 
-    <select id="departmentContainerFilter">
-        <option value="">All Departments</option>
-    </select>
+    <!-- Containers by Warehouse -->
 
-    <select id="statusContainerFilter">
-        <option value="">All Status</option>
-        <option value="استلمت">Received</option>
-        <option value="">Not Received</option>
-    </select>
+    <div class="chart-card">
 
-    <select id="distributionFilter">
-        <option value="">All Distribution</option>
-        <option value="تم التوزيع">Distributed</option>
-        <option value="لم يتم">Not Distributed</option>
-    </select>
+        <div class="chart-title">
 
-    <input
-        type="date"
-        id="etaContainerFilter">
+            Containers by Warehouse
 
-</div>
+        </div>
 
-<div class="table-container">
+        <div class="chart-body">
 
-<table id="containerTable">
+            <canvas id="warehouseChart"></canvas>
 
-<thead>
+        </div>
 
-<tr>
+    </div>
 
-    
-    <th>Entry</th>
-    
-    <th>S/N</th>
+    <!-- Received / Not Received by Warehouse -->
 
-    <th>Container</th>
+    <div class="chart-card">
 
-    <th>Model</th>
+        <div class="chart-title">
 
-    <th>Qty</th>
+            Received vs Not Received
 
-    <th>ETA</th>
+        </div>
 
-    <th>Department</th>
+        <div class="chart-body">
 
-    <th>Warehouse</th>
-    
-    <th>Status</th>
+            <canvas id="warehouseStatusChart"></canvas>
 
-    <th>Distribution</th>
+        </div>
 
-</tr>
+    </div>
 
-</thead>
+ </div>
+<br>
 
-<tbody>
 
-</tbody>
+    <!-- Filters -->
 
-</table>
+    <div class="table-toolbar">
 
-</div>
+        <input
+            type="text"
+            id="containerSearch"
+            placeholder="Search Container, Entry, Model...">
+
+        <select id="warehouseFilter">
+            <option value="">All Warehouses</option>
+        </select>
+
+        <select id="departmentContainerFilter">
+            <option value="">All Departments</option>
+        </select>
+
+        <select id="statusContainerFilter">
+            <option value="">All Status</option>
+            <option value="استلمت">Received</option>
+            <option value="غير مستلمة">Not Received</option>
+        </select>
+
+        <select id="distributionFilter">
+            <option value="">All Distribution</option>
+            <option value="تم التوزيع">Distributed</option>
+            <option value="لم يتم">Waiting Distribution</option>
+        </select>
+
+        <input
+            type="date"
+            id="etaContainerFilter">
+
+    </div>
+
+    <!-- Table -->
+
+    <div class="table-container">
+
+        <table id="containerTable">
+
+            <colgroup>
+
+                <col style="width:12%">
+                <col style="width:8%">
+                <col style="width:10%">
+                <col style="width:10%">
+                <col style="width:10%">
+                <col style="width:12%">
+                <col style="width:20%">
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:6%">
+
+            </colgroup>
+
+            <thead>
+
+                <tr>
+
+                    <th>Container</th>
+
+                    <th>Entry</th>
+
+                    <th>S/N</th>
+
+                    <th>ETA</th>
+
+                    <th>Department</th>
+
+                    <th>Warehouse</th>
+
+                    <th>Model</th>
+
+                    <th>Qty</th>
+
+                    <th>Status</th>
+
+                    <th>Distribution</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </section>
 
