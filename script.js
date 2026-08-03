@@ -66,25 +66,31 @@ async function loadData(){
 
 async function loadContainers(){
 
-    alert("loadContainers");
+    console.log("1- loadContainers started");
 
     try{
 
-        const response =
-            await fetch(API_URL + "?sheet=CONTAINERS");
+        const response = await fetch(API_URL + "?sheet=CONTAINERS");
 
-        containers =
-            await response.json();
+        console.log("2- Response =", response);
 
-        alert("Rows = " + containers.length);
+        containers = await response.json();
+
+        console.log("3- Rows =", containers.length);
+
+        console.log(containers[0]);
 
         renderContainers(containers);
 
+        console.log("4- render finished");
+
         updateContainerKPIs(containers);
+
+        console.log("5- KPI finished");
 
     }catch(err){
 
-        alert(err);
+        console.error("ERROR:", err);
 
     }
 
