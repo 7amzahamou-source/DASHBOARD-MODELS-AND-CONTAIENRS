@@ -2,7 +2,7 @@ const API_URL =
 "https://script.google.com/macros/s/AKfycbyZIUvCUj4vLx35pg0sqMziD3tikSzVrLuaJagmneQJUoeCLxJ5V-grqQ1AqjZcic_LGg/exec";
 
 let shipments = [];
-
+let containers = [];
 let monthChart = null;
 let factoryChart = null;
 
@@ -57,6 +57,102 @@ async function loadData(){
         alert("Unable to load Google Sheets data.");
 
     }
+
+}
+
+// =========================================
+// Load Containers
+// =========================================
+
+async function loadContainers(){
+
+    try{
+
+        const response =
+            await fetch(API_URL + "?sheet=CONTAINERS");
+
+        containers =
+            await response.json();
+
+        renderContainers(containers);
+
+        updateContainerKPIs(containers);
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+// =========================================
+// Render Containers
+// =========================================
+
+function renderContainers(data){
+
+    const tbody =
+        document.querySelector("#containerTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.forEach(item=>{
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${item.container}</td>
+
+            <td>${item.entry}</td>
+
+            <td>${item.sn}</td>
+
+            <td>${item.eta}</td>
+
+            <td>${item.department}</td>
+
+            <td>${item.warehouse || "-"}</td>
+
+            <td>${item.status || "-"}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+// =========================================
+// Container KPIs
+// =========================================
+
+function updateContainerKPIs(data){
+
+    document.getElementById("containerTotal").textContent =
+        data.length.toLocaleString();
+
+    const received = data.filter(x =>
+        String(x.status || "").trim() !== ""
+    );
+
+    document.getElementById("containerReceived").textContent =
+        received.length.toLocaleString();
+
+    const distributed = data.filter(x =>
+        String(x.distribution || "")
+        .includes("تم")
+    );
+
+    document.getElementById("containerDistributed").textContent =
+        distributed.length.toLocaleString();
+
+    document.getElementById("containerWaiting").textContent =
+        (data.length - distributed.length).toLocaleString();
 
 }
 
@@ -346,6 +442,7 @@ function applyFilters(){
     drawFactoryChart(filtered);
 
 }
+
 
 // =========================================
 // Event Listeners
@@ -848,3 +945,45 @@ function drawFactoryChart(data){
     );
 
 }
+
+// =========================================
+// Page Navigation
+// =========================================
+
+const dashboardBtn =
+    document.getElementById("dashboardBtn");
+
+const containersBtn =
+    document.getElementById("containersBtn");
+
+const dashboardPage =
+    document.querySelector("main section:first-child");
+
+const containersPage =
+    document.getElementById("containersPage");
+
+dashboardBtn.addEventListener("click",()=>{
+
+    dashboardPage.style.display = "block";
+
+    containersPage.style.display = "none";
+
+    dashboardBtn.classList.add("active");
+
+    containersBtn.classList.remove("active");
+
+});
+
+containersBtn.addEventListener("click",()=>{
+
+    dashboardPage.style.display = "none";
+
+    containersPage.style.display = "block";
+
+    dashboardBtn.classList.remove("active");
+
+    containersBtn.classList.add("active");
+
+    loadContainers();
+
+});
