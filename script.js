@@ -126,34 +126,27 @@ async function loadContainers(){
 
 function renderContainers(data){
 
-    const tbody =
-        document.querySelector("#containerTable tbody");
+    const tbody = document.querySelector("#containerTable tbody");
 
     tbody.innerHTML = "";
 
-    data.forEach(item=>{
+    console.log("Rendering...", data.length);
 
-        tbody.innerHTML += `
+    data.slice(0,10).forEach(item=>{
 
-        <tr>
+        const tr = document.createElement("tr");
 
+        tr.innerHTML = `
             <td>${item.container}</td>
-
             <td>${item.entry}</td>
-
-            <td>${item.serial}</td>
-
+            <td>${item.sn}</td>
             <td>${item.eta}</td>
-
             <td>${item.department}</td>
-
             <td>${item.warehouse || "-"}</td>
-
             <td>${item.status || "-"}</td>
-
-        </tr>
-
         `;
+
+        tbody.appendChild(tr);
 
     });
 
