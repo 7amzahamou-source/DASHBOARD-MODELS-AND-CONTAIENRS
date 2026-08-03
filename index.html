@@ -1,374 +1,987 @@
-<!DOCTYPE html>
-<html lang="en">
+const API_URL =
+"https://script.google.com/macros/s/AKfycbyZIUvCUj4vLx35pg0sqMziD3tikSzVrLuaJagmneQJUoeCLxJ5V-grqQ1AqjZcic_LGg/exec";
 
-<head>
+let shipments = [];
+let containers = [];
+let monthChart = null;
+let factoryChart = null;
 
-    <meta charset="UTF-8">
+let etaAscending = true;
+let entryAscending = true;
+let qtyAscending = true;
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// =========================================
+// استخراج عدد الحاويات
+// يدعم:
+// 2X40HQ
+// 3X20GP
+// 1 x 40HQ
+// =========================================
 
-    <title>Logistics Control Tower</title>
+function getContainerCount(value){
 
-    <link rel="stylesheet" href="style.css">
+    const match = String(value || "").match(/\d+/);
 
-</head>
+    return match ? Number(match[0]) : 0;
 
-<body>
+}
 
-    <!-- Header -->
+// =========================================
+// Load Data
+// =========================================
 
-    <header class="header">
+async function loadData(){
 
-    <div class="header-left">
+    try{
 
-        <button class="menu-btn" id="menuBtn">
-            ☰
-        </button>
+        const response = await fetch(API_URL);
 
-    </div>
+        shipments = await response.json();
 
-    <div class="header-center">
+        populateDepartmentFilter(shipments);
 
-        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
+        populatePOLFilter(shipments);
 
-        <p>قسم اللوجستيك</p>
+        populatePODFilter(shipments);
 
-    </div>
+        populateFactoryFilter(shipments);
 
-    <div class="header-right">
+        applyFilters();
 
-    </div>
+    }
 
-</header>
+    catch(error){
 
-    <!-- Navigation -->
+        console.error(error);
 
-     <nav class="navbar">
+        alert("Unable to load Google Sheets data.");
 
-    <button class="nav-btn active" id="dashboardBtn">
-        📊 Dashboard
-    </button>
+    }
 
-    <button class="nav-btn" id="containersBtn">
-        📦 Containers
-    </button>
+}
 
-</nav>
+// =========================================
+// Load Containers
+// =========================================
 
-    <!-- Main -->
+async function loadContainers(){
 
-    <main class="container">
+    try{
 
-        <!-- Dashboard -->
+        const response = await fetch(API_URL + "?sheet=CONTAINERS");
 
-        <section>
+        containers = await response.json();
 
-            <h2>Dashboard</h2>
+        renderContainers(containers);
 
-            <!-- KPI Cards -->
+        updateContainerKPIs(containers);
 
-<div class="kpi-grid">
+    }
 
-    <div class="kpi-card shipments">
+    catch(error){
 
-        <div class="kpi-icon">📦</div>
+        console.error(error);
 
-        <div class="kpi-content">
+    }
 
-            <div class="kpi-value" id="totalShipments">0</div>
+}
 
-            <div class="kpi-title">Total Shipments</div>
+// =========================================
+// Render Containers
+// =========================================
 
-        </div>
+function renderContainers(data){
 
-    </div>
+    const tbody =
+        document.querySelector("#containerTable tbody");
 
-    <div class="kpi-card containers">
+    tbody.innerHTML = "";
 
-        <div class="kpi-icon">🚢</div>
+    data.forEach(item=>{
 
-        <div class="kpi-content">
+        tbody.innerHTML += `
 
-            <div class="kpi-value" id="totalContainers">0</div>
+        <tr>
 
-            <div class="kpi-title">Total Containers</div>
+            <td>${item.container}</td>
 
-        </div>
+            <td>${item.entry}</td>
 
-    </div>
+            <td>${item.sn}</td>
 
-    <div class="kpi-card arrived">
+            <td>${item.eta}</td>
 
-        <div class="kpi-icon">✅</div>
+            <td>${item.department}</td>
 
-        <div class="kpi-content">
+            <td>${item.warehouse}</td>
 
-            <div class="kpi-value" id="containersArrived">0</div>
+            <td>${item.status}</td>
 
-            <div class="kpi-title">Containers Arrived</div>
+        </tr>
 
-        </div>
+        `;
 
-    </div>
+    });
 
-    <div class="kpi-card sea">
+}
 
-        <div class="kpi-icon">🌊</div>
+// =========================================
+// Container KPIs
+// =========================================
 
-        <div class="kpi-content">
+function updateContainerKPIs(data){
 
-            <div class="kpi-value" id="containersOnSea">0</div>
+    document.getElementById("containerTotal").textContent =
+        data.length.toLocaleString();
 
-            <div class="kpi-title">Containers On Sea</div>
+    const received = data.filter(x =>
+        String(x.status || "").trim() !== ""
+    );
 
-        </div>
+    document.getElementById("containerReceived").textContent =
+        received.length.toLocaleString();
 
-    </div>
+    const distributed = data.filter(x =>
+        String(x.distribution || "")
+        .includes("تم")
+    );
 
-</div>
+    document.getElementById("containerDistributed").textContent =
+        distributed.length.toLocaleString();
 
-                        <!-- Charts -->
+    document.getElementById("containerWaiting").textContent =
+        (data.length - distributed.length).toLocaleString();
 
-            <div class="charts-grid">
+}
 
-                <!-- Containers by Month -->
+// =========================================
+// Render Table
+// =========================================
 
-                <div class="chart-card">
+function renderTable(data){
 
-                    <div class="chart-title">
-                        Containers by ETA Month
-                    </div>
+    const tbody =
+        document.querySelector("#shipmentTable tbody");
 
-                    <div class="chart-body">
+    tbody.innerHTML = "";
 
-                        <canvas id="monthChart"></canvas>
+    data.forEach(item=>{
 
-                    </div>
+        tbody.innerHTML += `
 
-                </div>
+        <tr>
 
-                <!-- Top 3 Factories -->
+            <td>${item.entry}</td>
 
-                <div class="chart-card">
+            <td>${item.factory}</td>
 
-                    <div class="chart-title">
-                        Top 3 Factories
-                    </div>
+            <td>${item.model}</td>
 
-                    <div class="chart-body">
+            <td>${item.description}</td>
 
-                        <canvas id="factoryChart"></canvas>
+            <td>${Number(item.qty).toLocaleString()}</td>
 
-                    </div>
+            <td>${item.etd}</td>
 
-                </div>
+            <td>${item.eta}</td>
 
-            </div>
+            <td>${item.pol}</td>
 
-        </section>
+            <td>${item.pod}</td>
 
-<!-- Shipments -->
+        </tr>
 
-<section>
+        `;
 
-    <h2>Shipments</h2>
+    });
 
-    <div class="table-toolbar">
+}
+// =========================================
+// Fill Department Filter
+// =========================================
 
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Search Entry, Factory, Model, ETA...">
+function populateDepartmentFilter(data){
 
-        <select id="departmentFilter">
-            <option value="">All Departments</option>
-        </select>
+    const select =
+        document.getElementById("departmentFilter");
 
-        <select id="polFilter">
-            <option value="">All POL</option>
-        </select>
+    select.innerHTML =
+        '<option value="">All Departments</option>';
 
-        <select id="podFilter">
-            <option value="">All POD</option>
-        </select>
+    const departments = [...new Set(
 
-        <select id="factoryFilter">
-            <option value="">All Factories</option>
-        </select>
+        data
+            .map(item => String(item.department || "").trim())
+            .filter(item => item !== "")
 
-        <select id="statusFilter">
-            <option value="">All Shipments</option>
-            <option value="sea">🚢 On Sea</option>
-            <option value="arrived">✅ Arrived</option>
-        </select>
+    )].sort((a,b)=>a.localeCompare(b));
 
-    </div>
+    departments.forEach(dep=>{
 
-    <div class="table-container">
+        const option =
+            document.createElement("option");
 
-        <table id="shipmentTable">
+        option.value = dep;
 
-            <colgroup>
-                <col style="width:7%">
-                <col style="width:8%">
-                <col style="width:18%">
-                <col style="width:34%">
-                <col style="width:8%">
-                <col style="width:9%">
-                <col style="width:9%">
-                <col style="width:4%">
-                <col style="width:3%">
-            </colgroup>
+        option.textContent = dep;
 
-            <thead>
+        select.appendChild(option);
 
-                <tr>
+    });
 
-                    <th id="entryHeader" style="cursor:pointer;">
-                        Entry ▲
-                    </th>
+}
 
-                    <th>
-                        Factory
-                    </th>
+// =========================================
+// Fill POL Filter
+// =========================================
 
-                    <th>
-                        Model
-                    </th>
+function populatePOLFilter(data){
 
-                    <th>
-                        Description
-                    </th>
+    const select =
+        document.getElementById("polFilter");
 
-                    <th id="qtyHeader" style="cursor:pointer;">
-                        Qty ▲
-                    </th>
+    select.innerHTML =
+        '<option value="">All POL</option>';
 
-                    <th>
-                        ETD
-                    </th>
+    const values = [...new Set(
 
-                    <th id="etaHeader" style="cursor:pointer;">
-                        ETA ▲
-                    </th>
+        data
+            .map(item => String(item.pol || "").trim())
+            .filter(item => item !== "")
 
-                    <th>
-                        POL
-                    </th>
+    )].sort((a,b)=>a.localeCompare(b));
 
-                    <th>
-                        POD
-                    </th>
+    values.forEach(value=>{
 
-                </tr>
+        const option =
+            document.createElement("option");
 
-            </thead>
+        option.value = value;
 
-            <tbody>
+        option.textContent = value;
 
-            </tbody>
+        select.appendChild(option);
 
-        </table>
+    });
 
-    </div>
+}
 
-</section>
+// =========================================
+// Fill POD Filter
+// =========================================
 
-<section id="containersPage" style="display:none;">
+function populatePODFilter(data){
 
-<h2>Containers</h2>
+    const select =
+        document.getElementById("podFilter");
 
-<div class="kpi-grid">
+    select.innerHTML =
+        '<option value="">All POD</option>';
 
-<div class="kpi-card">
+    const values = [...new Set(
 
-<div class="kpi-value" id="containerTotal">0</div>
+        data
+            .map(item => String(item.pod || "").trim())
+            .filter(item => item !== "")
 
-<div class="kpi-title">Total Containers</div>
+    )].sort((a,b)=>a.localeCompare(b));
 
-</div>
+    values.forEach(value=>{
 
-<div class="kpi-card">
+        const option =
+            document.createElement("option");
 
-<div class="kpi-value" id="containerReceived">0</div>
+        option.value = value;
 
-<div class="kpi-title">Received</div>
+        option.textContent = value;
 
-</div>
+        select.appendChild(option);
 
-<div class="kpi-card">
+    });
 
-<div class="kpi-value" id="containerWaiting">0</div>
+}
 
-<div class="kpi-title">Waiting Distribution</div>
+// =========================================
+// Fill Factory Filter
+// =========================================
 
-</div>
+function populateFactoryFilter(data){
 
-<div class="kpi-card">
+    const select =
+        document.getElementById("factoryFilter");
 
-<div class="kpi-value" id="containerDistributed">0</div>
+    select.innerHTML =
+        '<option value="">All Factories</option>';
 
-<div class="kpi-title">Distributed</div>
+    const values = [...new Set(
 
-</div>
+        data
+            .map(item => String(item.factory || "").trim())
+            .filter(item => item !== "")
 
-</div>
+    )].sort((a,b)=>a.localeCompare(b));
 
-<div class="table-toolbar">
+    values.forEach(value=>{
 
-<input
-type="text"
-id="containerSearch"
-placeholder="Search Container...">
+        const option =
+            document.createElement("option");
 
-</div>
+        option.value = value;
 
-<div class="table-container">
+        option.textContent = value;
 
-<table id="containerTable">
+        select.appendChild(option);
 
-<thead>
+    });
 
-<tr>
+}
+// =========================================
+// Search + Filters
+// =========================================
 
-<th>Container</th>
+function applyFilters(){
 
-<th>Entry</th>
+    const keyword =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
 
-<th>S/N</th>
+    const department =
+        document.getElementById("departmentFilter")
+        .value;
 
-<th>ETA</th>
+    const pol =
+        document.getElementById("polFilter")
+        .value;
 
-<th>Department</th>
+    const pod =
+        document.getElementById("podFilter")
+        .value;
 
-<th>Warehouse</th>
+    const factory =
+        document.getElementById("factoryFilter")
+        .value;
 
-<th>Status</th>
+    const status =
+        document.getElementById("statusFilter")
+        .value;
 
-</tr>
+    const filtered = shipments.filter(item=>{
 
-</thead>
+        const searchMatch =
 
-<tbody>
+            String(item.entry || "").toLowerCase().includes(keyword) ||
 
-</tbody>
+            String(item.factory || "").toLowerCase().includes(keyword) ||
 
-</table>
+            String(item.model || "").toLowerCase().includes(keyword) ||
 
-</div>
+            String(item.description || "").toLowerCase().includes(keyword) ||
 
-</section>
+            String(item.department || "").toLowerCase().includes(keyword) ||
 
-</main>
+            String(item.pol || "").toLowerCase().includes(keyword) ||
 
-    <!-- Chart.js -->
+            String(item.pod || "").toLowerCase().includes(keyword) ||
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            String(item.eta || "").toLowerCase().includes(keyword);
 
-    <!-- Main Script -->
+        const departmentMatch =
 
-    <script src="script.js"></script>
+            department === "" ||
 
-</body>
+            item.department === department;
 
-</html>
+        const polMatch =
+
+            pol === "" ||
+
+            item.pol === pol;
+
+        const podMatch =
+
+            pod === "" ||
+
+            item.pod === pod;
+
+        const factoryMatch =
+
+            factory === "" ||
+
+            item.factory === factory;
+
+        const arrived =
+            String(item.bayan || "").trim() !== "";
+
+        const statusMatch =
+
+            status === "" ||
+
+            (status === "sea" && !arrived) ||
+
+            (status === "arrived" && arrived);
+
+        return searchMatch &&
+               departmentMatch &&
+               polMatch &&
+               podMatch &&
+               factoryMatch &&
+               statusMatch;
+
+    });
+
+    renderTable(filtered);
+
+    updateKPIs(filtered);
+
+    drawMonthChart(filtered);
+
+    drawFactoryChart(filtered);
+
+}
+
+
+// =========================================
+// Event Listeners
+// =========================================
+
+document
+    .getElementById("searchInput")
+    .addEventListener("input", applyFilters);
+
+document
+    .getElementById("departmentFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("polFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("podFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("factoryFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("statusFilter")
+    .addEventListener("change", applyFilters);
+
+loadData();
+// =========================================
+// Sort Entry
+// =========================================
+
+document.getElementById("entryHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return entryAscending
+
+            ? String(a.entry || "").localeCompare(
+                String(b.entry || ""),
+                undefined,
+                {numeric:true}
+            )
+
+            : String(b.entry || "").localeCompare(
+                String(a.entry || ""),
+                undefined,
+                {numeric:true}
+            );
+
+    });
+
+    entryAscending = !entryAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort Qty
+// =========================================
+
+document.getElementById("qtyHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return qtyAscending
+
+            ? Number(a.qty || 0) - Number(b.qty || 0)
+
+            : Number(b.qty || 0) - Number(a.qty || 0);
+
+    });
+
+    qtyAscending = !qtyAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort ETA
+// =========================================
+
+document.getElementById("etaHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        const d1 = new Date(a.eta || "");
+
+        const d2 = new Date(b.eta || "");
+
+        return etaAscending
+
+            ? d1 - d2
+
+            : d2 - d1;
+
+    });
+
+    etaAscending = !etaAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// KPI Cards
+// =========================================
+
+function updateKPIs(data){
+
+    // =========================
+    // Total Shipments (Unique Entry)
+    // =========================
+
+    const uniqueEntries = new Set(
+
+        data
+            .map(row => String(row.entry || "").trim())
+            .filter(entry => entry !== "")
+
+    );
+
+    document.getElementById("totalShipments").textContent =
+
+        uniqueEntries.size.toLocaleString();
+
+    // =========================
+    // Total Containers
+    // =========================
+
+    const totalContainers = data.reduce((sum,row)=>{
+
+        return sum + getContainerCount(row.hq);
+
+    },0);
+
+    document.getElementById("totalContainers").textContent =
+
+        totalContainers.toLocaleString();
+
+    // =========================
+    // Containers Arrived / On Sea
+    // =========================
+
+    let arrived = 0;
+    let onSea = 0;
+
+    data.forEach(row=>{
+
+        const containers = getContainerCount(row.hq);
+
+        if(String(row.bayan || "").trim() !== ""){
+
+            arrived += containers;
+
+        }else{
+
+            onSea += containers;
+
+        }
+
+    });
+
+    document.getElementById("containersArrived").textContent =
+
+        arrived.toLocaleString();
+
+    document.getElementById("containersOnSea").textContent =
+
+        onSea.toLocaleString();
+
+}
+// =========================================
+// Containers by ETA Month
+// =========================================
+
+function drawMonthChart(data){
+
+    const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    const shipmentsPerMonth = new Array(12).fill(0);
+    const containersPerMonth = new Array(12).fill(0);
+
+    data.forEach(item=>{
+
+        if(!item.eta) return;
+
+        const date = new Date(item.eta);
+
+        if(isNaN(date)) return;
+
+        const month = date.getMonth();
+
+        shipmentsPerMonth[month]++;
+
+        containersPerMonth[month] += getContainerCount(item.hq);
+
+    });
+
+    if(monthChart){
+
+        monthChart.destroy();
+
+    }
+
+    monthChart = new Chart(
+
+        document.getElementById("monthChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:months,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsPerMonth,
+
+                    containers:containersPerMonth,
+
+                    backgroundColor:"rgba(54,162,235,0.25)",
+
+                    borderColor:"rgba(54,162,235,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:40
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        grid:{
+                            display:false
+                        }
+
+                    },
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+                            precision:0
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+// =========================================
+// Top 3 Factories Chart
+// =========================================
+
+function drawFactoryChart(data){
+
+    const factories = {};
+
+    data.forEach(item=>{
+
+        const factory = String(item.factory || "").trim();
+
+        if(factory === "") return;
+
+        if(!factories[factory]){
+
+            factories[factory] = {
+
+                shipments:0,
+
+                containers:0
+
+            };
+
+        }
+
+        factories[factory].shipments++;
+
+        factories[factory].containers += getContainerCount(item.hq);
+
+    });
+
+    const sorted = Object.entries(factories)
+
+        .sort((a,b)=>{
+
+            if(b[1].shipments !== a[1].shipments){
+
+                return b[1].shipments - a[1].shipments;
+
+            }
+
+            return a[0].localeCompare(b[0]);
+
+        })
+
+        .slice(0,3);
+
+    const labels = sorted.map(item=>item[0]);
+
+    const shipmentsCount = sorted.map(item=>item[1].shipments);
+
+    const containersCount = sorted.map(item=>item[1].containers);
+
+    if(factoryChart){
+
+        factoryChart.destroy();
+
+    }
+
+    factoryChart = new Chart(
+
+        document.getElementById("factoryChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsCount,
+
+                    containers:containersCount,
+
+                    backgroundColor:"rgba(75,192,192,.25)",
+
+                    borderColor:"rgba(75,192,192,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:28
+
+                }]
+
+            },
+
+            options:{
+
+                indexAxis:"y",
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
+                    },
+
+                    y:{
+
+                        grid:{
+
+                            display:false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+// =========================================
+// Page Navigation
+// =========================================
+
+const dashboardBtn =
+    document.getElementById("dashboardBtn");
+
+const containersBtn =
+    document.getElementById("containersBtn");
+
+const dashboardPage =
+    document.querySelector("main section:first-child");
+
+const containersPage =
+    document.getElementById("containersPage");
+
+dashboardBtn.addEventListener("click",()=>{
+
+    dashboardPage.style.display = "block";
+
+    containersPage.style.display = "none";
+
+    dashboardBtn.classList.add("active");
+
+    containersBtn.classList.remove("active");
+
+});
+
+containersBtn.addEventListener("click",()=>{
+
+    dashboardPage.style.display = "none";
+
+    containersPage.style.display = "block";
+
+    dashboardBtn.classList.remove("active");
+
+    containersBtn.classList.add("active");
+
+    loadContainers();
+
+});
