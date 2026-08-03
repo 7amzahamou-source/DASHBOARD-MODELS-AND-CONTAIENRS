@@ -303,10 +303,34 @@ placeholder="Search Entry, Factory, Model, ETA...">
 
 <div class="table-toolbar">
 
-<input
-type="text"
-id="containerSearch"
-placeholder="Search Container, Entry, Model...">
+    <input
+        type="text"
+        id="containerSearch"
+        placeholder="Search Container, Entry, Model...">
+
+    <select id="warehouseFilter">
+        <option value="">All Warehouses</option>
+    </select>
+
+    <select id="departmentContainerFilter">
+        <option value="">All Departments</option>
+    </select>
+
+    <select id="statusContainerFilter">
+        <option value="">All Status</option>
+        <option value="استلمت">Received</option>
+        <option value="">Not Received</option>
+    </select>
+
+    <select id="distributionFilter">
+        <option value="">All Distribution</option>
+        <option value="تم التوزيع">Distributed</option>
+        <option value="لم يتم">Not Distributed</option>
+    </select>
+
+    <input
+        type="date"
+        id="etaContainerFilter">
 
 </div>
 
