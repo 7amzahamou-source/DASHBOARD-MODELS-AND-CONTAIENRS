@@ -116,22 +116,22 @@ function renderContainers(data){
 
         tr.innerHTML = `
 
-            <td>${item.container}</td>
-
             <td>${item.entry}</td>
 
             <td>${item.sn}</td>
 
-            <td>${item.eta}</td>
-
-            <td>${item.department}</td>
-
-            <td>${item.warehouse || "-"}</td>
+            <td>${item.container}</td>
 
             <td>${item.model || "-"}</td>
 
             <td>${Number(item.qty || 0).toLocaleString()}</td>
 
+            <td>${item.eta}</td>
+
+            <td>${item.warehouse || "-"}</td>
+
+            <td>${item.department}</td> 
+          
             <td>${item.status || "-"}</td>
 
             <td>${item.distribution || "-"}</td>
