@@ -88,15 +88,31 @@ async function loadContainers(){
 
     console.log(containers[0]);
 
+    try{
+
     renderContainers(containers);
 
     console.log("Render OK");
+
+ }catch(e){
+
+    console.error("Render Error:", e);
+
+ }
+
+ try{
 
     updateContainerKPIs(containers);
 
     console.log("KPI OK");
 
-}catch(err){
+ }catch(e){
+
+    console.error("KPI Error:", e);
+
+ }
+
+ }catch(err){
 
     console.error("ERROR =", err);
 
