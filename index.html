@@ -1,372 +1,1033 @@
-<!DOCTYPE html>
-<html lang="en">
+const API_URL =
+"https://script.google.com/macros/s/AKfycbyZIUvCUj4vLx35pg0sqMziD3tikSzVrLuaJagmneQJUoeCLxJ5V-grqQ1AqjZcic_LGg/exec";
 
-<head>
+let shipments = [];
+let containers = [];
+let monthChart = null;
+let factoryChart = null;
 
-<meta charset="UTF-8">
+let etaAscending = true;
+let entryAscending = true;
+let qtyAscending = true;
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+// =========================================
+// استخراج عدد الحاويات
+// يدعم:
+// 2X40HQ
+// 3X20GP
+// 1 x 40HQ
+// =========================================
 
-<title>Logistics Control Tower</title>
+function getContainerCount(value){
 
-<link rel="stylesheet" href="style.css">
+    const match = String(value || "").match(/\d+/);
 
-</head>
+    return match ? Number(match[0]) : 0;
 
-<body>
+}
 
-<!-- ================= HEADER ================= -->
+// =========================================
+// Load Data
+// =========================================
 
-<header class="header">
+async function loadData(){
 
-    <div class="header-left">
+    try{
 
-        <button class="menu-btn" id="menuBtn">
-            ☰
-        </button>
+        const response = await fetch(API_URL);
 
-    </div>
+        shipments = await response.json();
 
-    <div class="header-center">
+        populateDepartmentFilter(shipments);
 
-        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
+        populatePOLFilter(shipments);
 
-        <p>قسم اللوجستيك</p>
+        populatePODFilter(shipments);
 
-    </div>
+        populateFactoryFilter(shipments);
 
-    <div class="header-right"></div>
+        applyFilters();
 
-</header>
+    }
 
-<!-- ================= NAVBAR ================= -->
+    catch(error){
 
-<nav class="navbar">
+        console.error(error);
 
-    <button
-        class="nav-btn active"
-        id="dashboardBtn">
+        alert("Unable to load Google Sheets data.");
 
-        📊 Dashboard
+    }
 
-    </button>
+}
 
-    <button
-        class="nav-btn"
-        id="containersBtn">
+// =========================
+// Load Containers
+// =========================
 
-        📦 Containers
+async function loadContainers(){
 
-    </button>
+    console.log("1- loadContainers started");
 
-</nav>
+    try{
 
-<!-- ================= MAIN ================= -->
+    const url = API_URL + "?sheet=CONTAINERS";
 
-<main class="container">
+    console.log("URL =", url);
 
-<!-- ================= DASHBOARD PAGE ================= -->
+    const response = await fetch(url);
 
-<section id="dashboardPage">
+    console.log("STATUS =", response.status);
 
-<h2>Dashboard</h2>
+    const text = await response.text();
 
-<div class="kpi-grid">
+    console.log(text.substring(0,300));
 
-    <div class="kpi-card shipments">
+    containers = JSON.parse(text);
 
-    <div class="kpi-icon">📦</div>
+    console.log("Rows =", containers.length);
 
-    <div class="kpi-content">
+    console.log(containers[0]);
 
-        <div class="kpi-value" id="totalShipments">0</div>
+    try{
 
-        <div class="kpi-title">Total Shipments</div>
+    renderContainers(containers);
 
-    </div>
+    console.log("Render OK");
 
-</div>
+ }catch(e){
 
-<div class="kpi-card containers">
+    console.error("Render Error:", e);
 
-    <div class="kpi-icon">🚢</div>
+ }
 
-    <div class="kpi-content">
+ try{
 
-        <div class="kpi-value" id="totalContainers">0</div>
+    updateContainerKPIs(containers);
 
-        <div class="kpi-title">Total Containers</div>
+    console.log("KPI OK");
 
-    </div>
+ }catch(e){
 
-</div>
+    console.error("KPI Error:", e);
 
-<div class="kpi-card arrived">
+ }
 
-    <div class="kpi-icon">✅</div>
+ }catch(err){
 
-    <div class="kpi-content">
+    console.error("ERROR =", err);
 
-        <div class="kpi-value" id="containersArrived">0</div>
+}
 
-        <div class="kpi-title">Containers Arrived</div>
+}
 
-    </div>
+// =========================================
+// Render Containers
+// =========================================
 
-</div>
+function renderContainers(data){
 
-<div class="kpi-card sea">
+    const tbody = document.querySelector("#containerTable tbody");
 
-    <div class="kpi-icon">🌊</div>
+    tbody.innerHTML = "";
 
-    <div class="kpi-content">
+    console.log("Rendering...", data.length);
 
-        <div class="kpi-value" id="containersOnSea">0</div>
+    data.forEach(item=>{
 
-        <div class="kpi-title">Containers On Sea</div>
+        const tr = document.createElement("tr");
 
-    </div>
+        tr.innerHTML = `
+            
+            <td>${item.entry}</td>
+            <td>${item.sn}</td>
+            <td>${item.container}</td>
+            <td>${item.model || "-"}</td>
+            <td>${item.qty || "-"}</td>
+            <td>${item.eta}</td>
+            <td>${item.department}</td>
+            <td>${item.warehouse || "-"}</td>                    
+            <td>${item.status || "-"}</td>
+            <td>${item.distribution || "-"}</td>
+        `;
 
-</div>
+        tbody.appendChild(tr);
 
-</div>
+    });
 
-<!-- Charts -->
+}
 
-<div class="charts-grid">
+// =========================================
+// Container KPIs
+// =========================================
 
-    <div class="chart-card">
+function updateContainerKPIs(data){
 
-        <div class="chart-title">
-            Containers by ETA Month
-        </div>
+    // عدد الحاويات الفريدة
+    const uniqueContainers = [...new Set(
+        data.map(x => x.container)
+    )];
 
-        <div class="chart-body">
+    document.getElementById("containerTotal").textContent =
+        uniqueContainers.length.toLocaleString();
 
-            <canvas id="monthChart"></canvas>
+    // الحاويات المستلمة
+    const received = [...new Set(
+        data
+            .filter(x => String(x.status || "").trim() === "استلمت")
+            .map(x => x.container)
+    )];
 
-        </div>
+    document.getElementById("containerReceived").textContent =
+        received.length.toLocaleString();
 
-    </div>
+    // الحاويات غير المستلمة
+    document.getElementById("containerWaiting").textContent =
+        (uniqueContainers.length - received.length).toLocaleString();
 
-    <div class="chart-card">
+    // الحاويات التي لم يتم توزيعها
+    const waitingDistribution = [...new Set(
+        data
+            .filter(x => String(x.distribution || "").trim() !== "تم التوزيع")
+            .map(x => x.container)
+    )];
 
-        <div class="chart-title">
-            Top 3 Factories
-        </div>
+    document.getElementById("containerDistributed").textContent =
+        waitingDistribution.length.toLocaleString();
 
-        <div class="chart-body">
+}
 
-            <canvas id="factoryChart"></canvas>
+// =========================================
+// Render Table
+// =========================================
 
-        </div>
+function renderTable(data){
 
-    </div>
+    const tbody =
+        document.querySelector("#shipmentTable tbody");
 
-</div>
+    tbody.innerHTML = "";
 
-<!-- ================= SHIPMENTS ================= -->
+    data.forEach(item=>{
 
-<section id="shipmentsSection">
+        tbody.innerHTML += `
 
-<h2>Shipments</h2>
+        <tr>
 
-<div class="table-toolbar">
+            <td>${item.entry}</td>
 
-<input
-type="text"
-id="searchInput"
-placeholder="Search Entry, Factory, Model, ETA...">
+            <td>${item.factory}</td>
 
-<select id="departmentFilter">
-<option value="">All Departments</option>
-</select>
+            <td>${item.model}</td>
 
-<select id="polFilter">
-<option value="">All POL</option>
-</select>
+            <td>${item.description}</td>
 
-<select id="podFilter">
-<option value="">All POD</option>
-</select>
+            <td>${Number(item.qty).toLocaleString()}</td>
 
-<select id="factoryFilter">
-<option value="">All Factories</option>
-</select>
+            <td>${item.etd}</td>
 
-<select id="statusFilter">
-<option value="">All Shipments</option>
-<option value="sea">🚢 On Sea</option>
-<option value="arrived">✅ Arrived</option>
-</select>
+            <td>${item.eta}</td>
 
-</div>
+            <td>${item.pol}</td>
 
-<div class="table-container">
+            <td>${item.pod}</td>
 
-<table id="shipmentTable">
+        </tr>
 
-<colgroup>
+        `;
 
-<col style="width:7%">
-<col style="width:8%">
-<col style="width:18%">
-<col style="width:34%">
-<col style="width:8%">
-<col style="width:9%">
-<col style="width:9%">
-<col style="width:4%">
-<col style="width:3%">
+    });
 
-</colgroup>
+}
+// =========================================
+// Fill Department Filter
+// =========================================
 
-<thead>
+function populateDepartmentFilter(data){
 
-<tr>
+    const select =
+        document.getElementById("departmentFilter");
 
-<th id="entryHeader">Entry ▲</th>
+    select.innerHTML =
+        '<option value="">All Departments</option>';
 
-<th>Factory</th>
+    const departments = [...new Set(
 
-<th>Model</th>
+        data
+            .map(item => String(item.department || "").trim())
+            .filter(item => item !== "")
 
-<th>Description</th>
+    )].sort((a,b)=>a.localeCompare(b));
 
-<th id="qtyHeader">Qty ▲</th>
+    departments.forEach(dep=>{
 
-<th>ETD</th>
+        const option =
+            document.createElement("option");
 
-<th id="etaHeader">ETA ▲</th>
+        option.value = dep;
 
-<th>POL</th>
+        option.textContent = dep;
 
-<th>POD</th>
+        select.appendChild(option);
 
-</tr>
+    });
 
-</thead>
+}
 
-<tbody>
+// =========================================
+// Fill POL Filter
+// =========================================
 
-</tbody>
+function populatePOLFilter(data){
 
-</table>
+    const select =
+        document.getElementById("polFilter");
 
-</div>
+    select.innerHTML =
+        '<option value="">All POL</option>';
 
-</section>
+    const values = [...new Set(
 
-</section>
+        data
+            .map(item => String(item.pol || "").trim())
+            .filter(item => item !== "")
 
-<!-- ================= CONTAINERS PAGE ================= -->
+    )].sort((a,b)=>a.localeCompare(b));
 
-<section id="containersPage" style="display:none;">
+    values.forEach(value=>{
 
-<h2>Containers</h2>
+        const option =
+            document.createElement("option");
 
-<div class="kpi-grid">
+        option.value = value;
 
-<div class="kpi-card">
+        option.textContent = value;
 
-<div class="kpi-value" id="containerTotal">0</div>
+        select.appendChild(option);
 
-<div class="kpi-title">Total Containers</div>
+    });
 
-</div>
+}
 
-<div class="kpi-card">
+// =========================================
+// Fill POD Filter
+// =========================================
 
-<div class="kpi-value" id="containerReceived">0</div>
+function populatePODFilter(data){
 
-<div class="kpi-title">Received Containers</div>
+    const select =
+        document.getElementById("podFilter");
 
-</div>
+    select.innerHTML =
+        '<option value="">All POD</option>';
 
-<div class="kpi-card">
+    const values = [...new Set(
 
-<div class="kpi-value" id="containerWaiting">0</div>
+        data
+            .map(item => String(item.pod || "").trim())
+            .filter(item => item !== "")
 
-<div class="kpi-title">Not Received</div>
+    )].sort((a,b)=>a.localeCompare(b));
 
-</div>
+    values.forEach(value=>{
 
-<div class="kpi-card">
+        const option =
+            document.createElement("option");
 
-<div class="kpi-value" id="containerDistributed">0</div>
+        option.value = value;
 
-<div class="kpi-title">Waiting Distribution</div>
+        option.textContent = value;
 
-</div>
+        select.appendChild(option);
 
-</div>
+    });
 
-<div class="table-toolbar">
+}
 
-<input
-type="text"
-id="containerSearch"
-placeholder="Search Container, Entry, Model...">
+// =========================================
+// Fill Factory Filter
+// =========================================
 
-</div>
+function populateFactoryFilter(data){
 
-<div class="table-container">
+    const select =
+        document.getElementById("factoryFilter");
 
-<table id="containerTable">
+    select.innerHTML =
+        '<option value="">All Factories</option>';
 
-<thead>
+    const values = [...new Set(
 
-<tr>
+        data
+            .map(item => String(item.factory || "").trim())
+            .filter(item => item !== "")
 
-    
-    <th>Entry</th>
-    
-    <th>S/N</th>
+    )].sort((a,b)=>a.localeCompare(b));
 
-    <th>Container</th>
+    values.forEach(value=>{
 
-    <th>Model</th>
+        const option =
+            document.createElement("option");
 
-    <th>Qty</th>
+        option.value = value;
 
-    <th>ETA</th>
+        option.textContent = value;
 
-    <th>Department</th>
+        select.appendChild(option);
 
-    <th>Warehouse</th>
-    
-    <th>Status</th>
+    });
 
-    <th>Distribution</th>
+}
+// =========================================
+// Search + Filters
+// =========================================
 
-</tr>
+function applyFilters(){
 
-</thead>
+    const keyword =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
 
-<tbody>
+    const department =
+        document.getElementById("departmentFilter")
+        .value;
 
-</tbody>
+    const pol =
+        document.getElementById("polFilter")
+        .value;
 
-</table>
+    const pod =
+        document.getElementById("podFilter")
+        .value;
 
-</div>
+    const factory =
+        document.getElementById("factoryFilter")
+        .value;
 
-</section>
+    const status =
+        document.getElementById("statusFilter")
+        .value;
 
-</main>
+    const filtered = shipments.filter(item=>{
 
-<!-- ========================= -->
-<!-- Chart.js -->
-<!-- ========================= -->
+        const searchMatch =
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            String(item.entry || "").toLowerCase().includes(keyword) ||
 
-<!-- ========================= -->
-<!-- Main Script -->
-<!-- ========================= -->
+            String(item.factory || "").toLowerCase().includes(keyword) ||
 
-<script src="script.js"></script>
+            String(item.model || "").toLowerCase().includes(keyword) ||
 
-</body>
+            String(item.description || "").toLowerCase().includes(keyword) ||
 
-</html>
+            String(item.department || "").toLowerCase().includes(keyword) ||
+
+            String(item.pol || "").toLowerCase().includes(keyword) ||
+
+            String(item.pod || "").toLowerCase().includes(keyword) ||
+
+            String(item.eta || "").toLowerCase().includes(keyword);
+
+        const departmentMatch =
+
+            department === "" ||
+
+            item.department === department;
+
+        const polMatch =
+
+            pol === "" ||
+
+            item.pol === pol;
+
+        const podMatch =
+
+            pod === "" ||
+
+            item.pod === pod;
+
+        const factoryMatch =
+
+            factory === "" ||
+
+            item.factory === factory;
+
+        const arrived =
+            String(item.bayan || "").trim() !== "";
+
+        const statusMatch =
+
+            status === "" ||
+
+            (status === "sea" && !arrived) ||
+
+            (status === "arrived" && arrived);
+
+        return searchMatch &&
+               departmentMatch &&
+               polMatch &&
+               podMatch &&
+               factoryMatch &&
+               statusMatch;
+
+    });
+
+    renderTable(filtered);
+
+    updateKPIs(filtered);
+
+    drawMonthChart(filtered);
+
+    drawFactoryChart(filtered);
+
+}
+
+
+// =========================================
+// Event Listeners
+// =========================================
+
+document
+    .getElementById("searchInput")
+    .addEventListener("input", applyFilters);
+
+document
+    .getElementById("departmentFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("polFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("podFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("factoryFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("statusFilter")
+    .addEventListener("change", applyFilters);
+
+loadData();
+// =========================================
+// Sort Entry
+// =========================================
+
+document.getElementById("entryHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return entryAscending
+
+            ? String(a.entry || "").localeCompare(
+                String(b.entry || ""),
+                undefined,
+                {numeric:true}
+            )
+
+            : String(b.entry || "").localeCompare(
+                String(a.entry || ""),
+                undefined,
+                {numeric:true}
+            );
+
+    });
+
+    entryAscending = !entryAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort Qty
+// =========================================
+
+document.getElementById("qtyHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return qtyAscending
+
+            ? Number(a.qty || 0) - Number(b.qty || 0)
+
+            : Number(b.qty || 0) - Number(a.qty || 0);
+
+    });
+
+    qtyAscending = !qtyAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort ETA
+// =========================================
+
+document.getElementById("etaHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        const d1 = new Date(a.eta || "");
+
+        const d2 = new Date(b.eta || "");
+
+        return etaAscending
+
+            ? d1 - d2
+
+            : d2 - d1;
+
+    });
+
+    etaAscending = !etaAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// KPI Cards
+// =========================================
+
+function updateKPIs(data){
+
+    // =========================
+    // Total Shipments (Unique Entry)
+    // =========================
+
+    const uniqueEntries = new Set(
+
+        data
+            .map(row => String(row.entry || "").trim())
+            .filter(entry => entry !== "")
+
+    );
+
+    document.getElementById("totalShipments").textContent =
+
+        uniqueEntries.size.toLocaleString();
+
+    // =========================
+    // Total Containers
+    // =========================
+
+    const totalContainers = data.reduce((sum,row)=>{
+
+        return sum + getContainerCount(row.hq);
+
+    },0);
+
+    document.getElementById("totalContainers").textContent =
+
+        totalContainers.toLocaleString();
+
+    // =========================
+    // Containers Arrived / On Sea
+    // =========================
+
+    let arrived = 0;
+    let onSea = 0;
+
+    data.forEach(row=>{
+
+        const containers = getContainerCount(row.hq);
+
+        if(String(row.bayan || "").trim() !== ""){
+
+            arrived += containers;
+
+        }else{
+
+            onSea += containers;
+
+        }
+
+    });
+
+    document.getElementById("containersArrived").textContent =
+
+        arrived.toLocaleString();
+
+    document.getElementById("containersOnSea").textContent =
+
+        onSea.toLocaleString();
+
+}
+// =========================================
+// Containers by ETA Month
+// =========================================
+
+function drawMonthChart(data){
+
+    const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    const shipmentsPerMonth = new Array(12).fill(0);
+    const containersPerMonth = new Array(12).fill(0);
+
+    data.forEach(item=>{
+
+        if(!item.eta) return;
+
+        const date = new Date(item.eta);
+
+        if(isNaN(date)) return;
+
+        const month = date.getMonth();
+
+        shipmentsPerMonth[month]++;
+
+        containersPerMonth[month] += getContainerCount(item.hq);
+
+    });
+
+    if(monthChart){
+
+        monthChart.destroy();
+
+    }
+
+    monthChart = new Chart(
+
+        document.getElementById("monthChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:months,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsPerMonth,
+
+                    containers:containersPerMonth,
+
+                    backgroundColor:"rgba(54,162,235,0.25)",
+
+                    borderColor:"rgba(54,162,235,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:40
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        grid:{
+                            display:false
+                        }
+
+                    },
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+                            precision:0
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+// =========================================
+// Top 3 Factories Chart
+// =========================================
+
+function drawFactoryChart(data){
+
+    const factories = {};
+
+    data.forEach(item=>{
+
+        const factory = String(item.factory || "").trim();
+
+        if(factory === "") return;
+
+        if(!factories[factory]){
+
+            factories[factory] = {
+
+                shipments:0,
+
+                containers:0
+
+            };
+
+        }
+
+        factories[factory].shipments++;
+
+        factories[factory].containers += getContainerCount(item.hq);
+
+    });
+
+    const sorted = Object.entries(factories)
+
+        .sort((a,b)=>{
+
+            if(b[1].shipments !== a[1].shipments){
+
+                return b[1].shipments - a[1].shipments;
+
+            }
+
+            return a[0].localeCompare(b[0]);
+
+        })
+
+        .slice(0,3);
+
+    const labels = sorted.map(item=>item[0]);
+
+    const shipmentsCount = sorted.map(item=>item[1].shipments);
+
+    const containersCount = sorted.map(item=>item[1].containers);
+
+    if(factoryChart){
+
+        factoryChart.destroy();
+
+    }
+
+    factoryChart = new Chart(
+
+        document.getElementById("factoryChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsCount,
+
+                    containers:containersCount,
+
+                    backgroundColor:"rgba(75,192,192,.25)",
+
+                    borderColor:"rgba(75,192,192,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:28
+
+                }]
+
+            },
+
+            options:{
+
+                indexAxis:"y",
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
+                    },
+
+                    y:{
+
+                        grid:{
+
+                            display:false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+// =========================================
+// Page Navigation
+// =========================================
+
+// =========================
+// Navigation
+// =========================
+
+const dashboardBtn =
+    document.getElementById("dashboardBtn");
+
+const containersBtn =
+    document.getElementById("containersBtn");
+
+const dashboardPage =
+    document.getElementById("dashboardPage");
+
+const containersPage =
+    document.getElementById("containersPage");
+
+dashboardBtn.addEventListener("click", () => {
+
+    dashboardPage.style.display = "block";
+
+    containersPage.style.display = "none";
+
+    dashboardBtn.classList.add("active");
+
+    containersBtn.classList.remove("active");
+
+});
+
+containersBtn.addEventListener("click", () => {
+
+    dashboardPage.style.display = "none";
+
+    containersPage.style.display = "block";
+
+    dashboardBtn.classList.remove("active");
+
+    containersBtn.classList.add("active");
+
+    loadContainers();
+
+});
