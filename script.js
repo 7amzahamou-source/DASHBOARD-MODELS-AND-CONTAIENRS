@@ -957,7 +957,7 @@ const containersBtn =
     document.getElementById("containersBtn");
 
 const dashboardPage =
-    document.querySelector("main section:first-child");
+    document.getElementById("dashboardPage");
 
 const containersPage =
     document.getElementById("containersPage");
