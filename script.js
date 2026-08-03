@@ -158,26 +158,37 @@ function renderContainers(data){
 
 function updateContainerKPIs(data){
 
-    document.getElementById("containerTotal").textContent =
-        data.length.toLocaleString();
+    // عدد الحاويات الفريدة
+    const uniqueContainers = [...new Set(
+        data.map(x => x.container)
+    )];
 
-    const received = data.filter(x =>
-        String(x.status || "").trim() !== ""
-    );
+    document.getElementById("containerTotal").textContent =
+        uniqueContainers.length.toLocaleString();
+
+    // الحاويات المستلمة
+    const received = [...new Set(
+        data
+            .filter(x => String(x.status || "").trim() === "استلمت")
+            .map(x => x.container)
+    )];
 
     document.getElementById("containerReceived").textContent =
         received.length.toLocaleString();
 
-    const distributed = data.filter(x =>
-        String(x.distribution || "")
-        .includes("تم")
-    );
+    // الحاويات غير المستلمة
+    document.getElementById("containerWaiting").textContent =
+        (uniqueContainers.length - received.length).toLocaleString();
+
+    // الحاويات التي لم يتم توزيعها
+    const waitingDistribution = [...new Set(
+        data
+            .filter(x => String(x.distribution || "").trim() !== "تم التوزيع")
+            .map(x => x.container)
+    )];
 
     document.getElementById("containerDistributed").textContent =
-        distributed.length.toLocaleString();
-
-    document.getElementById("containerWaiting").textContent =
-        (data.length - distributed.length).toLocaleString();
+        waitingDistribution.length.toLocaleString();
 
 }
 
