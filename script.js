@@ -70,29 +70,37 @@ async function loadContainers(){
 
     try{
 
-        const response = await fetch(API_URL + "?sheet=CONTAINERS");
+    const url = API_URL + "?sheet=CONTAINERS";
 
-        console.log("2- Response =", response);
+    console.log("URL =", url);
 
-        containers = await response.json();
+    const response = await fetch(url);
 
-        console.log("3- Rows =", containers.length);
+    console.log("STATUS =", response.status);
 
-        console.log(containers[0]);
+    const text = await response.text();
 
-        renderContainers(containers);
+    console.log(text.substring(0,300));
 
-        console.log("4- render finished");
+    containers = JSON.parse(text);
 
-        updateContainerKPIs(containers);
+    console.log("Rows =", containers.length);
 
-        console.log("5- KPI finished");
+    console.log(containers[0]);
 
-    }catch(err){
+    renderContainers(containers);
 
-        console.error("ERROR:", err);
+    console.log("Render OK");
 
-    }
+    updateContainerKPIs(containers);
+
+    console.log("KPI OK");
+
+}catch(err){
+
+    console.error("ERROR =", err);
+
+}
 
 }
 
