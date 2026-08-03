@@ -132,18 +132,22 @@ function renderContainers(data){
 
     console.log("Rendering...", data.length);
 
-    data.slice(0,10).forEach(item=>{
+    data.forEach(item=>{
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${item.container}</td>
+            
             <td>${item.entry}</td>
             <td>${item.sn}</td>
+            <td>${item.container}</td>
+            <td>${item.model || "-"}</td>
+            <td>${item.qty || "-"}</td>
             <td>${item.eta}</td>
             <td>${item.department}</td>
-            <td>${item.warehouse || "-"}</td>
+            <td>${item.warehouse || "-"}</td>                    
             <td>${item.status || "-"}</td>
+            <td>${item.distribution || "-"}</td>
         `;
 
         tbody.appendChild(tr);
