@@ -117,7 +117,7 @@ function renderContainers(data){
 
             <td>${item.entry}</td>
 
-            <td>${item.sn}</td>
+            <td>${item.serial}</td>
 
             <td>${item.eta}</td>
 
