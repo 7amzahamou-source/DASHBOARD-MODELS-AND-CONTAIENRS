@@ -74,6 +74,8 @@ async function loadContainers(){
         containers =
             await response.json();
 
+        console.log(containers);
+
         renderContainers(containers);
 
         updateContainerKPIs(containers);
