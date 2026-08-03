@@ -60,9 +60,9 @@ async function loadData(){
 
 }
 
-// =========================================
+// =========================
 // Load Containers
-// =========================================
+// =========================
 
 async function loadContainers(){
 
@@ -78,11 +78,9 @@ async function loadContainers(){
 
         updateContainerKPIs(containers);
 
-    }
+    }catch(err){
 
-    catch(error){
-
-        console.error(error);
+        console.error(err);
 
     }
 
@@ -950,6 +948,10 @@ function drawFactoryChart(data){
 // Page Navigation
 // =========================================
 
+// =========================
+// Navigation
+// =========================
+
 const dashboardBtn =
     document.getElementById("dashboardBtn");
 
@@ -962,7 +964,7 @@ const dashboardPage =
 const containersPage =
     document.getElementById("containersPage");
 
-dashboardBtn.addEventListener("click",()=>{
+dashboardBtn.addEventListener("click", () => {
 
     dashboardPage.style.display = "block";
 
@@ -974,7 +976,7 @@ dashboardBtn.addEventListener("click",()=>{
 
 });
 
-containersBtn.addEventListener("click",()=>{
+containersBtn.addEventListener("click", () => {
 
     dashboardPage.style.display = "none";
 
