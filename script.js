@@ -66,6 +66,8 @@ async function loadData(){
 
 async function loadContainers(){
 
+    alert("loadContainers");
+
     try{
 
         const response =
@@ -74,7 +76,7 @@ async function loadContainers(){
         containers =
             await response.json();
 
-        alert(JSON.stringify(containers[0], null, 2));
+        alert("Rows = " + containers.length);
 
         renderContainers(containers);
 
@@ -82,7 +84,7 @@ async function loadContainers(){
 
     }catch(err){
 
-        console.error(err);
+        alert(err);
 
     }
 
