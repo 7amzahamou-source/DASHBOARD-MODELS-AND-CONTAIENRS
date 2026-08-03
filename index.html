@@ -45,23 +45,15 @@
 
      <nav class="navbar">
 
-       <button class="nav-btn active">
-          📊 Dashboard
-       </button>
+    <button class="nav-btn active" id="dashboardBtn">
+        📊 Dashboard
+    </button>
 
-       <button class="nav-btn">
-          🚚 Shipments
-       </button>
+    <button class="nav-btn" id="containersBtn">
+        📦 Containers
+    </button>
 
-       <button class="nav-btn">
-          📦 Models
-       </button>
- 
-       <button class="nav-btn">
-          ⚙️ Settings
-       </button>
-
-    </nav>
+</nav>
 
     <!-- Main -->
 
@@ -279,6 +271,91 @@
         </table>
 
     </div>
+
+</section>
+
+<section id="containersPage" style="display:none;">
+
+<h2>Containers</h2>
+
+<div class="kpi-grid">
+
+<div class="kpi-card">
+
+<div class="kpi-value" id="containerTotal">0</div>
+
+<div class="kpi-title">Total Containers</div>
+
+</div>
+
+<div class="kpi-card">
+
+<div class="kpi-value" id="containerReceived">0</div>
+
+<div class="kpi-title">Received</div>
+
+</div>
+
+<div class="kpi-card">
+
+<div class="kpi-value" id="containerWaiting">0</div>
+
+<div class="kpi-title">Waiting Distribution</div>
+
+</div>
+
+<div class="kpi-card">
+
+<div class="kpi-value" id="containerDistributed">0</div>
+
+<div class="kpi-title">Distributed</div>
+
+</div>
+
+</div>
+
+<div class="table-toolbar">
+
+<input
+type="text"
+id="containerSearch"
+placeholder="Search Container...">
+
+</div>
+
+<div class="table-container">
+
+<table id="containerTable">
+
+<thead>
+
+<tr>
+
+<th>Container</th>
+
+<th>Entry</th>
+
+<th>S/N</th>
+
+<th>ETA</th>
+
+<th>Department</th>
+
+<th>Warehouse</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
 
 </section>
 
