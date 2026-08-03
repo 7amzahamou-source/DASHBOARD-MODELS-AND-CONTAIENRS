@@ -74,7 +74,7 @@ async function loadContainers(){
         containers =
             await response.json();
 
-        console.log(containers[0]);
+        alert(JSON.stringify(containers[0], null, 2));
 
         renderContainers(containers);
 
