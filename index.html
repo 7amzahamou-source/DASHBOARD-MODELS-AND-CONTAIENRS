@@ -5,7 +5,8 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Logistics Control Tower</title>
 
@@ -19,47 +20,53 @@
 
     <header class="header">
 
-    <div class="header-left">
+        <div class="header-left">
 
-        <button class="menu-btn" id="menuBtn">
-            ☰
-        </button>
+            <button class="menu-btn" id="menuBtn">
+                ☰
+            </button>
 
-    </div>
+        </div>
 
-    <div class="header-center">
+        <div class="header-center">
 
-        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
+            <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
 
-        <p>قسم اللوجستيك</p>
+            <p>قسم اللوجستيك</p>
 
-    </div>
+        </div>
 
-    <div class="header-right">
+        <div class="header-right"></div>
 
-    </div>
-
-</header>
+    </header>
 
     <!-- Navigation -->
 
-     <nav class="navbar">
+    <nav class="navbar">
 
-    <button class="nav-btn active" id="dashboardBtn">
-        📊 Dashboard
-    </button>
+        <button class="nav-btn active"
+                id="dashboardBtn">
 
-    <button class="nav-btn" id="containersBtn">
-        📦 Containers
-    </button>
+            📊 Dashboard
 
-</nav>
+        </button>
+
+        <button class="nav-btn"
+                id="containersBtn">
+
+            📦 Containers
+
+        </button>
+
+    </nav>
 
     <!-- Main -->
 
     <main class="container">
 
-        <!-- Dashboard -->
+        <!-- ========================= -->
+        <!-- Dashboard Page -->
+        <!-- ========================= -->
 
         <section id="dashboardPage">
 
@@ -67,59 +74,96 @@
 
             <!-- KPI Cards -->
 
-<div class="kpi-grid">
+            <div class="kpi-grid">
+                <div class="kpi-card shipments">
 
-    <div class="kpi-card shipments">
+    <div class="kpi-icon">📦</div>
 
-        <div class="kpi-icon">📦</div>
+    <div class="kpi-content">
 
-        <div class="kpi-content">
+        <div class="kpi-value" id="totalShipments">0</div>
 
-            <div class="kpi-value" id="totalShipments">0</div>
+        <div class="kpi-title">Total Shipments</div>
 
-            <div class="kpi-title">Total Shipments</div>
+    </div>
+
+</div>
+
+<div class="kpi-card containers">
+
+    <div class="kpi-icon">🚢</div>
+
+    <div class="kpi-content">
+
+        <div class="kpi-value" id="totalContainers">0</div>
+
+        <div class="kpi-title">Total Containers</div>
+
+    </div>
+
+</div>
+
+<div class="kpi-card arrived">
+
+    <div class="kpi-icon">✅</div>
+
+    <div class="kpi-content">
+
+        <div class="kpi-value" id="containersArrived">0</div>
+
+        <div class="kpi-title">Containers Arrived</div>
+
+    </div>
+
+</div>
+
+<div class="kpi-card sea">
+
+    <div class="kpi-icon">🌊</div>
+
+    <div class="kpi-content">
+
+        <div class="kpi-value" id="containersOnSea">0</div>
+
+        <div class="kpi-title">Containers On Sea</div>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- Charts -->
+
+<div class="charts-grid">
+
+    <div class="chart-card">
+
+        <div class="chart-title">
+
+            Containers by ETA Month
+
+        </div>
+
+        <div class="chart-body">
+
+            <canvas id="monthChart"></canvas>
 
         </div>
 
     </div>
 
-    <div class="kpi-card containers">
+    <div class="chart-card">
 
-        <div class="kpi-icon">🚢</div>
+        <div class="chart-title">
 
-        <div class="kpi-content">
-
-            <div class="kpi-value" id="totalContainers">0</div>
-
-            <div class="kpi-title">Total Containers</div>
+            Top 3 Factories
 
         </div>
 
-    </div>
+        <div class="chart-body">
 
-    <div class="kpi-card arrived">
-
-        <div class="kpi-icon">✅</div>
-
-        <div class="kpi-content">
-
-            <div class="kpi-value" id="containersArrived">0</div>
-
-            <div class="kpi-title">Containers Arrived</div>
-
-        </div>
-
-    </div>
-
-    <div class="kpi-card sea">
-
-        <div class="kpi-icon">🌊</div>
-
-        <div class="kpi-content">
-
-            <div class="kpi-value" id="containersOnSea">0</div>
-
-            <div class="kpi-title">Containers On Sea</div>
+            <canvas id="factoryChart"></canvas>
 
         </div>
 
@@ -127,49 +171,8 @@
 
 </div>
 
-                        <!-- Charts -->
-
-            <div class="charts-grid">
-
-                <!-- Containers by Month -->
-
-                <div class="chart-card">
-
-                    <div class="chart-title">
-                        Containers by ETA Month
-                    </div>
-
-                    <div class="chart-body">
-
-                        <canvas id="monthChart"></canvas>
-
-                    </div>
-
-                </div>
-
-                <!-- Top 3 Factories -->
-
-                <div class="chart-card">
-
-                    <div class="chart-title">
-                        Top 3 Factories
-                    </div>
-
-                    <div class="chart-body">
-
-                        <canvas id="factoryChart"></canvas>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
 <!-- Shipments -->
-
-<section>
+ <section>
 
     <h2>Shipments</h2>
 
@@ -209,6 +212,7 @@
         <table id="shipmentTable">
 
             <colgroup>
+
                 <col style="width:7%">
                 <col style="width:8%">
                 <col style="width:18%">
@@ -218,47 +222,30 @@
                 <col style="width:9%">
                 <col style="width:4%">
                 <col style="width:3%">
+
             </colgroup>
 
             <thead>
 
                 <tr>
 
-                    <th id="entryHeader" style="cursor:pointer;">
-                        Entry ▲
-                    </th>
+                    <th id="entryHeader">Entry ▲</th>
 
-                    <th>
-                        Factory
-                    </th>
+                    <th>Factory</th>
 
-                    <th>
-                        Model
-                    </th>
+                    <th>Model</th>
 
-                    <th>
-                        Description
-                    </th>
+                    <th>Description</th>
 
-                    <th id="qtyHeader" style="cursor:pointer;">
-                        Qty ▲
-                    </th>
+                    <th id="qtyHeader">Qty ▲</th>
 
-                    <th>
-                        ETD
-                    </th>
+                    <th>ETD</th>
 
-                    <th id="etaHeader" style="cursor:pointer;">
-                        ETA ▲
-                    </th>
+                    <th id="etaHeader">ETA ▲</th>
 
-                    <th>
-                        POL
-                    </th>
+                    <th>POL</th>
 
-                    <th>
-                        POD
-                    </th>
+                    <th>POD</th>
 
                 </tr>
 
@@ -274,100 +261,113 @@
 
 </section>
 
+<!-- إغلاق dashboardPage -->
+
+</section>
+<!-- ========================= -->
+<!-- Containers Page -->
+<!-- ========================= -->
+
 <section id="containersPage" style="display:none;">
 
-<h2>Containers</h2>
+    <h2>Containers</h2>
 
-<div class="kpi-grid">
+    <!-- Container KPIs -->
 
-<div class="kpi-card">
+    <div class="kpi-grid">
 
-<div class="kpi-value" id="containerTotal">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Total Containers</div>
+            <div class="kpi-value" id="containerTotal">0</div>
 
-</div>
+            <div class="kpi-title">Total Containers</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerReceived">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Received</div>
+            <div class="kpi-value" id="containerReceived">0</div>
 
-</div>
+            <div class="kpi-title">Received</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerWaiting">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Waiting Distribution</div>
+            <div class="kpi-value" id="containerWaiting">0</div>
 
-</div>
+            <div class="kpi-title">Waiting Distribution</div>
 
-<div class="kpi-card">
+        </div>
 
-<div class="kpi-value" id="containerDistributed">0</div>
+        <div class="kpi-card">
 
-<div class="kpi-title">Distributed</div>
+            <div class="kpi-value" id="containerDistributed">0</div>
 
-</div>
+            <div class="kpi-title">Distributed</div>
 
-</div>
+        </div>
 
-<div class="table-toolbar">
+    </div>
 
-<input
-type="text"
-id="containerSearch"
-placeholder="Search Container...">
+    <!-- Search -->
 
-</div>
+    <div class="table-toolbar">
 
-<div class="table-container">
+        <input
+            type="text"
+            id="containerSearch"
+            placeholder="Search Container, Entry, Model...">
 
-<table id="containerTable">
+    </div>
 
-<thead>
+    <!-- Table -->
 
-<tr>
+    <div class="table-container">
 
-<th>Container</th>
+        <table id="containerTable">
 
-<th>Entry</th>
+            <thead>
 
-<th>S/N</th>
+                <tr>
 
-<th>ETA</th>
+                    <th>Container</th>
 
-<th>Department</th>
+                    <th>Entry</th>
 
-<th>Warehouse</th>
+                    <th>S/N</th>
 
-<th>Status</th>
+                    <th>ETA</th>
 
-</tr>
+                    <th>Department</th>
 
-</thead>
+                    <th>Warehouse</th>
 
-<tbody>
+                    <th>Status</th>
 
-</tbody>
+                </tr>
 
-</table>
+            </thead>
 
-</div>
+            <tbody>
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </section>
 
 </main>
 
-    <!-- Chart.js -->
+<!-- Chart.js -->
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Main Script -->
+<!-- Main Script -->
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 
