@@ -3,79 +3,78 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>Logistics Control Tower</title>
+<title>Logistics Control Tower</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-    <!-- Header -->
+<!-- ================= HEADER ================= -->
 
-    <header class="header">
+<header class="header">
 
-        <div class="header-left">
+    <div class="header-left">
 
-            <button class="menu-btn" id="menuBtn">
-                ☰
-            </button>
-
-        </div>
-
-        <div class="header-center">
-
-            <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
-
-            <p>قسم اللوجستيك</p>
-
-        </div>
-
-        <div class="header-right"></div>
-
-    </header>
-
-    <!-- Navigation -->
-
-    <nav class="navbar">
-
-        <button class="nav-btn active"
-                id="dashboardBtn">
-
-            📊 Dashboard
-
+        <button class="menu-btn" id="menuBtn">
+            ☰
         </button>
 
-        <button class="nav-btn"
-                id="containersBtn">
+    </div>
 
-            📦 Containers
+    <div class="header-center">
 
-        </button>
+        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
 
-    </nav>
+        <p>قسم اللوجستيك</p>
 
-    <!-- Main -->
+    </div>
 
-    <main class="container">
+    <div class="header-right"></div>
 
-        <!-- ========================= -->
-        <!-- Dashboard Page -->
-        <!-- ========================= -->
+</header>
 
-        <section id="dashboardPage">
+<!-- ================= NAVBAR ================= -->
 
-            <h2>Dashboard</h2>
+<nav class="navbar">
 
-            <!-- KPI Cards -->
+    <button
+        class="nav-btn active"
+        id="dashboardBtn">
 
-            <div class="kpi-grid">
-                <div class="kpi-card shipments">
+        📊 Dashboard
+
+    </button>
+
+    <button
+        class="nav-btn"
+        id="containersBtn">
+
+        📦 Containers
+
+    </button>
+
+</nav>
+
+<!-- ================= MAIN ================= -->
+
+<main class="container">
+
+<!-- ================= DASHBOARD PAGE ================= -->
+
+<section id="dashboardPage">
+
+<h2>Dashboard</h2>
+
+<div class="kpi-grid">
+
+    <div class="kpi-card shipments">
 
     <div class="kpi-icon">📦</div>
 
@@ -140,9 +139,7 @@
     <div class="chart-card">
 
         <div class="chart-title">
-
             Containers by ETA Month
-
         </div>
 
         <div class="chart-body">
@@ -156,9 +153,7 @@
     <div class="chart-card">
 
         <div class="chart-title">
-
             Top 3 Factories
-
         </div>
 
         <div class="chart-body">
@@ -171,201 +166,197 @@
 
 </div>
 
-<!-- Shipments -->
- <section>
+<!-- ================= SHIPMENTS ================= -->
 
-    <h2>Shipments</h2>
+<section id="shipmentsSection">
 
-    <div class="table-toolbar">
+<h2>Shipments</h2>
 
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Search Entry, Factory, Model, ETA...">
+<div class="table-toolbar">
 
-        <select id="departmentFilter">
-            <option value="">All Departments</option>
-        </select>
+<input
+type="text"
+id="searchInput"
+placeholder="Search Entry, Factory, Model, ETA...">
 
-        <select id="polFilter">
-            <option value="">All POL</option>
-        </select>
+<select id="departmentFilter">
+<option value="">All Departments</option>
+</select>
 
-        <select id="podFilter">
-            <option value="">All POD</option>
-        </select>
+<select id="polFilter">
+<option value="">All POL</option>
+</select>
 
-        <select id="factoryFilter">
-            <option value="">All Factories</option>
-        </select>
+<select id="podFilter">
+<option value="">All POD</option>
+</select>
 
-        <select id="statusFilter">
-            <option value="">All Shipments</option>
-            <option value="sea">🚢 On Sea</option>
-            <option value="arrived">✅ Arrived</option>
-        </select>
+<select id="factoryFilter">
+<option value="">All Factories</option>
+</select>
 
-    </div>
+<select id="statusFilter">
+<option value="">All Shipments</option>
+<option value="sea">🚢 On Sea</option>
+<option value="arrived">✅ Arrived</option>
+</select>
 
-    <div class="table-container">
+</div>
 
-        <table id="shipmentTable">
+<div class="table-container">
 
-            <colgroup>
+<table id="shipmentTable">
 
-                <col style="width:7%">
-                <col style="width:8%">
-                <col style="width:18%">
-                <col style="width:34%">
-                <col style="width:8%">
-                <col style="width:9%">
-                <col style="width:9%">
-                <col style="width:4%">
-                <col style="width:3%">
+<colgroup>
 
-            </colgroup>
+<col style="width:7%">
+<col style="width:8%">
+<col style="width:18%">
+<col style="width:34%">
+<col style="width:8%">
+<col style="width:9%">
+<col style="width:9%">
+<col style="width:4%">
+<col style="width:3%">
 
-            <thead>
+</colgroup>
 
-                <tr>
+<thead>
 
-                    <th id="entryHeader">Entry ▲</th>
+<tr>
 
-                    <th>Factory</th>
+<th id="entryHeader">Entry ▲</th>
 
-                    <th>Model</th>
+<th>Factory</th>
 
-                    <th>Description</th>
+<th>Model</th>
 
-                    <th id="qtyHeader">Qty ▲</th>
+<th>Description</th>
 
-                    <th>ETD</th>
+<th id="qtyHeader">Qty ▲</th>
 
-                    <th id="etaHeader">ETA ▲</th>
+<th>ETD</th>
 
-                    <th>POL</th>
+<th id="etaHeader">ETA ▲</th>
 
-                    <th>POD</th>
+<th>POL</th>
 
-                </tr>
+<th>POD</th>
 
-            </thead>
+</tr>
 
-            <tbody>
+</thead>
 
-            </tbody>
+<tbody>
 
-        </table>
+</tbody>
 
-    </div>
+</table>
+
+</div>
+
+</section>
 
 </section>
 
-<!-- إغلاق dashboardPage -->
-
-</section>
-<!-- ========================= -->
-<!-- Containers Page -->
-<!-- ========================= -->
+<!-- ================= CONTAINERS PAGE ================= -->
 
 <section id="containersPage" style="display:none;">
 
-    <h2>Containers</h2>
+<h2>Containers</h2>
 
-    <!-- Container KPIs -->
+<div class="kpi-grid">
 
-    <div class="kpi-grid">
+<div class="kpi-card">
 
-        <div class="kpi-card">
+<div class="kpi-value" id="containerTotal">0</div>
 
-            <div class="kpi-value" id="containerTotal">0</div>
+<div class="kpi-title">Total Containers</div>
 
-            <div class="kpi-title">Total Containers</div>
+</div>
 
-        </div>
+<div class="kpi-card">
 
-        <div class="kpi-card">
+<div class="kpi-value" id="containerReceived">0</div>
 
-            <div class="kpi-value" id="containerReceived">0</div>
+<div class="kpi-title">Received Containers</div>
 
-            <div class="kpi-title">Received Containers</div>
+</div>
 
-        </div>
+<div class="kpi-card">
 
-        <div class="kpi-card">
+<div class="kpi-value" id="containerWaiting">0</div>
 
-            <div class="kpi-value" id="containerWaiting">0</div>
+<div class="kpi-title">Not Received</div>
 
-            <div class="kpi-title">Not Received</div>
+</div>
 
-        </div>
+<div class="kpi-card">
 
-        <div class="kpi-card">
+<div class="kpi-value" id="containerDistributed">0</div>
 
-            <div class="kpi-value" id="containerDistributed">0</div>
+<div class="kpi-title">Waiting Distribution</div>
 
-            <div class="kpi-title">Waiting Distribution</div>
+</div>
 
-        </div>
+</div>
 
-    </div>
+<div class="table-toolbar">
 
-    <!-- Search -->
+<input
+type="text"
+id="containerSearch"
+placeholder="Search Container, Entry, Model...">
 
-    <div class="table-toolbar">
+</div>
 
-        <input
-            type="text"
-            id="containerSearch"
-            placeholder="Search Container, Entry, Model...">
+<div class="table-container">
 
-    </div>
+<table id="containerTable">
 
-    <!-- Table -->
+<thead>
 
-    <div class="table-container">
+<tr>
 
-        <table id="containerTable">
+<th>Container</th>
 
-            <thead>
+<th>Entry</th>
 
-                <tr>
+<th>S/N</th>
 
-                    <th>Container</th>
+<th>ETA</th>
 
-                    <th>Entry</th>
+<th>Department</th>
 
-                    <th>S/N</th>
+<th>Warehouse</th>
 
-                    <th>ETA</th>
+<th>Status</th>
 
-                    <th>Department</th>
+</tr>
 
-                    <th>Warehouse</th>
+</thead>
 
-                    <th>Status</th>
+<tbody>
 
-                </tr>
+</tbody>
 
-            </thead>
+</table>
 
-            <tbody>
-
-            </tbody>
-
-        </table>
-
-    </div>
+</div>
 
 </section>
 
 </main>
 
+<!-- ========================= -->
 <!-- Chart.js -->
+<!-- ========================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- ========================= -->
 <!-- Main Script -->
+<!-- ========================= -->
 
 <script src="script.js"></script>
 
