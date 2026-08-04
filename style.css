@@ -1,3 +1,7 @@
+/* =========================================
+   Reset
+========================================= */
+
 *{
     margin:0;
     padding:0;
@@ -6,13 +10,16 @@
 }
 
 body{
+
     background:#f5f7fb;
-    color:#222;
+
+    color:#1e293b;
+
 }
 
-/* =========================
+/* =========================================
    Header
-========================= */
+========================================= */
 
 .header{
 
@@ -30,7 +37,7 @@ body{
 
     padding:0 28px;
 
-    box-shadow:0 4px 15px rgba(0,0,0,.12);
+    box-shadow:0 4px 18px rgba(0,0,0,.12);
 
 }
 
@@ -58,8 +65,6 @@ body{
     font-size:30px;
 
     font-weight:700;
-
-    margin:0;
 
 }
 
@@ -97,13 +102,13 @@ body{
 
 .menu-btn:hover{
 
-    background:rgba(255,255,255,.15);
+    background:rgba(255,255,255,.18);
 
 }
 
-/* =========================
+/* =========================================
    Navigation
-========================= */
+========================================= */
 
 .navbar{
 
@@ -111,9 +116,9 @@ body{
 
     justify-content:center;
 
-    gap:14px;
+    gap:15px;
 
-    padding:14px 20px;
+    padding:15px;
 
     background:#fff;
 
@@ -127,17 +132,15 @@ body{
 
     background:#f1f5f9;
 
-    color:#1e293b;
-
     padding:12px 24px;
 
     border-radius:12px;
 
+    cursor:pointer;
+
     font-size:15px;
 
     font-weight:600;
-
-    cursor:pointer;
 
     transition:.25s;
 
@@ -157,15 +160,17 @@ body{
 
     color:#fff;
 
-    box-shadow:0 6px 18px rgba(15,23,42,.25);
-
 }
+
+/* =========================================
+   Layout
+========================================= */
 
 .container{
 
     width:100%;
 
-    max-width:1500px;
+    max-width:1550px;
 
     margin:auto;
 
@@ -174,12 +179,15 @@ body{
 }
 
 h2{
-    margin-bottom:15px;
-}
 
-/* =========================
+    margin-bottom:18px;
+
+    color:#0f172a;
+
+}
+/* =========================================
    KPI Cards
-========================= */
+========================================= */
 
 .kpi-grid{
 
@@ -187,7 +195,7 @@ h2{
 
     grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 
-    gap:18px;
+    gap:20px;
 
     margin-bottom:30px;
 
@@ -196,6 +204,8 @@ h2{
 .kpi-card{
 
     background:#fff;
+
+    border:1px solid #e5e7eb;
 
     border-radius:18px;
 
@@ -206,8 +216,6 @@ h2{
     align-items:center;
 
     gap:18px;
-
-    border:1px solid #edf2f7;
 
     box-shadow:0 8px 24px rgba(15,23,42,.06);
 
@@ -263,7 +271,7 @@ h2{
 
 .sea .kpi-icon{
 
-    background:#e0f2fe;
+    background:#dbeafe;
 
 }
 
@@ -294,259 +302,9 @@ h2{
     font-size:15px;
 
 }
-
-.chart{
-    background:#fff;
-    height:260px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin-bottom:25px;
-    font-size:22px;
-    color:#888;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:20px;
-    border:1px solid #ccc;
-    border-radius:8px;
-}
-
-.table-placeholder{
-    background:#fff;
-    height:450px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:22px;
-    color:#888;
-}
-
-.table-toolbar{
-    margin-bottom:15px;
-}
-
-.table-toolbar input{
-    width:100%;
-    height:45px;
-    border:1px solid #dcdcdc;
-    border-radius:10px;
-    padding:0 15px;
-    font-size:15px;
-}
-
-.table-container{
-    width:100%;
-    overflow-x:auto;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-#containerTable{
-
-    min-width:1450px;
-
-}
-
-/* =========================
-   Shipments Table
-========================= */
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:auto;
-}
-
-thead{
-    background:#0f172a;
-    color:#fff;
-    position:sticky;
-    top:0;
-    z-index:10;
-}
-
-th,
-td{
-    padding:10px 8px;
-    vertical-align:middle;
-}
-
-th{
-    text-align:left;
-    font-size:14px;
-    font-weight:600;
-    white-space:nowrap;
-}
-
-td{
-    font-size:13px;
-    border-bottom:1px solid #ececec;
-    background:#fff;
-}
-
-tbody tr{
-    transition:.2s;
-}
-
-tbody tr:hover{
-    background:#f7f9fc;
-    cursor:pointer;
-}
-
-/* =========================
-   Shipments Table
-========================= */
-
-#shipmentTable th:nth-child(1),
-#shipmentTable td:nth-child(1){
-    width:7%;
-}
-
-#shipmentTable th:nth-child(2),
-#shipmentTable td:nth-child(2){
-    width:8%;
-}
-
-#shipmentTable th:nth-child(3),
-#shipmentTable td:nth-child(3){
-    width:18%;
-    white-space:normal;
-    word-break:break-word;
-}
-
-#shipmentTable th:nth-child(4),
-#shipmentTable td:nth-child(4){
-    width:34%;
-    white-space:normal;
-    word-break:break-word;
-}
-
-#shipmentTable th:nth-child(5),
-#shipmentTable td:nth-child(5){
-    width:8%;
-    text-align:center;
-}
-
-#shipmentTable th:nth-child(6),
-#shipmentTable td:nth-child(6){
-    width:9%;
-    text-align:center;
-}
-
-#shipmentTable th:nth-child(7),
-#shipmentTable td:nth-child(7){
-    width:9%;
-    text-align:center;
-}
-
-#shipmentTable th:nth-child(8),
-#shipmentTable td:nth-child(8){
-    width:4%;
-    text-align:center;
-}
-
-#shipmentTable th:nth-child(9),
-#shipmentTable td:nth-child(9){
-    width:3%;
-    text-align:center;
-}
-
-/* =========================
-   Containers Table
-========================= */
-
-#containerTable th,
-#containerTable td{
-
-    white-space:nowrap;
-
-    vertical-align:middle;
-
-}
-
-#containerTable th:nth-child(1),
-#containerTable td:nth-child(1){
-    width:8%;
-}
-
-#containerTable th:nth-child(2),
-#containerTable td:nth-child(2){
-    width:5%;
-    text-align:center;
-}
-
-#containerTable td:nth-child(3),
-#containerTable th:nth-child(3){
-
-    min-width:170px;
-
-}
-
-#containerTable td:nth-child(4),
-#containerTable th:nth-child(4){
-
-    min-width:260px;
-
-    white-space:normal;
-
-    line-height:1.35;
-
-}
-
-#containerTable th:nth-child(5),
-#containerTable td:nth-child(5){
-    width:7%;
-    text-align:center;
-}
-
-#containerTable td:nth-child(6),
-#containerTable th:nth-child(6){
-
-    min-width:110px;
-
-}
-
-#containerTable th:nth-child(7),
-#containerTable td:nth-child(7){
-
-    min-width:140px;
-
-}
-
-#containerTable th:nth-child(8),
-#containerTable td:nth-child(8){
-
-    min-width:150px;
-
-}
-
-#containerTable th:nth-child(9),
-#containerTable td:nth-child(9){
-    width:4%;
-    text-align:center;
-}
-
-#containerTable th:nth-child(10),
-#containerTable td:nth-child(10){
-    width:4%;
-    text-align:center;
-}
-
-#etaHeader,
-#entryHeader,
-#qtyHeader{
-    cursor:pointer;
-}
-/* ===========================
-   Dashboard Charts
-=========================== */
+/* =========================================
+   Charts
+========================================= */
 
 .charts-grid{
 
@@ -566,11 +324,11 @@ tbody tr:hover{
 
     border:1px solid #e5e7eb;
 
-    border-radius:14px;
+    border-radius:16px;
 
     overflow:hidden;
 
-    box-shadow:0 4px 12px rgba(0,0,0,.05);
+    box-shadow:0 6px 18px rgba(15,23,42,.06);
 
 }
 
@@ -582,9 +340,11 @@ tbody tr:hover{
 
     font-weight:600;
 
-    border-bottom:1px solid #ececec;
+    color:#0f172a;
 
     background:#fafafa;
+
+    border-bottom:1px solid #e5e7eb;
 
 }
 
@@ -592,7 +352,7 @@ tbody tr:hover{
 
     height:340px;
 
-    padding:15px;
+    padding:16px;
 
 }
 
@@ -604,9 +364,443 @@ tbody tr:hover{
 
 }
 
-/* Mobile */
+/* =========================================
+   Filters
+========================================= */
 
-@media(max-width:900px){
+.table-toolbar{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    margin-bottom:18px;
+
+}
+
+.table-toolbar input,
+.table-toolbar select{
+
+    height:44px;
+
+    padding:0 14px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:10px;
+
+    background:#fff;
+
+    font-size:14px;
+
+    transition:.2s;
+
+}
+
+.table-toolbar input{
+
+    flex:1;
+
+    min-width:260px;
+
+}
+
+.table-toolbar select{
+
+    min-width:170px;
+
+}
+
+.table-toolbar input:focus,
+.table-toolbar select:focus{
+
+    outline:none;
+
+    border-color:#3b82f6;
+
+    box-shadow:0 0 0 3px rgba(59,130,246,.15);
+
+}
+/* =========================================
+   Tables
+========================================= */
+
+.table-container{
+
+    width:100%;
+
+    overflow-x:auto;
+
+    overflow-y:auto;
+
+    -webkit-overflow-scrolling:touch;
+
+    background:#fff;
+
+    border-radius:16px;
+
+    border:1px solid #e5e7eb;
+
+    box-shadow:0 6px 18px rgba(15,23,42,.05);
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    table-layout:auto;
+
+}
+
+thead{
+
+    background:#0f172a;
+
+    color:#fff;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:10;
+
+}
+
+th{
+
+    padding:14px 12px;
+
+    text-align:left;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+
+}
+
+td{
+
+    padding:12px;
+
+    font-size:13px;
+
+    border-bottom:1px solid #edf2f7;
+
+    vertical-align:middle;
+
+}
+
+tbody tr{
+
+    transition:.2s;
+
+}
+
+tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+/* =========================================
+   Shipment Table
+========================================= */
+
+#shipmentTable{
+
+    min-width:1200px;
+
+}
+
+#shipmentTable th:nth-child(1),
+#shipmentTable td:nth-child(1){
+
+    width:7%;
+
+}
+
+#shipmentTable th:nth-child(2),
+#shipmentTable td:nth-child(2){
+
+    width:8%;
+
+}
+
+#shipmentTable th:nth-child(3),
+#shipmentTable td:nth-child(3){
+
+    min-width:180px;
+
+    white-space:normal;
+
+}
+
+#shipmentTable th:nth-child(4),
+#shipmentTable td:nth-child(4){
+
+    min-width:320px;
+
+    white-space:normal;
+
+    line-height:1.35;
+
+}
+
+#shipmentTable th:nth-child(5),
+#shipmentTable td:nth-child(5),
+
+#shipmentTable th:nth-child(6),
+#shipmentTable td:nth-child(6),
+
+#shipmentTable th:nth-child(7),
+#shipmentTable td:nth-child(7),
+
+#shipmentTable th:nth-child(8),
+#shipmentTable td:nth-child(8),
+
+#shipmentTable th:nth-child(9),
+#shipmentTable td:nth-child(9){
+
+    text-align:center;
+
+}
+
+/* =========================================
+   Container Table
+========================================= */
+
+#containerTable{
+
+    min-width:1500px;
+
+}
+
+#containerTable th{
+
+    white-space:nowrap;
+
+}
+
+#containerTable td{
+
+    vertical-align:middle;
+
+}
+
+#containerTable th:nth-child(1),
+#containerTable td:nth-child(1){
+
+    min-width:90px;
+
+}
+
+#containerTable th:nth-child(2),
+#containerTable td:nth-child(2){
+
+    min-width:70px;
+
+    text-align:center;
+
+}
+
+#containerTable th:nth-child(3),
+#containerTable td:nth-child(3){
+
+    min-width:170px;
+
+}
+
+#containerTable th:nth-child(4),
+#containerTable td:nth-child(4){
+
+    min-width:320px;
+
+    white-space:normal;
+
+    line-height:1.35;
+
+}
+
+#containerTable th:nth-child(5),
+#containerTable td:nth-child(5){
+
+    min-width:80px;
+
+    text-align:center;
+
+}
+
+#containerTable th:nth-child(6),
+#containerTable td:nth-child(6){
+
+    min-width:120px;
+
+    text-align:center;
+
+}
+
+#containerTable th:nth-child(7),
+#containerTable td:nth-child(7){
+
+    min-width:150px;
+
+}
+
+#containerTable th:nth-child(8),
+#containerTable td:nth-child(8){
+
+    min-width:150px;
+
+}
+
+#containerTable th:nth-child(9),
+#containerTable td:nth-child(9){
+
+    min-width:120px;
+
+    text-align:center;
+
+}
+
+#containerTable th:nth-child(10),
+#containerTable td:nth-child(10){
+
+    min-width:160px;
+
+    text-align:center;
+
+}
+
+/* Sort Headers */
+
+#entryHeader,
+#qtyHeader,
+#etaHeader{
+
+    cursor:pointer;
+
+    user-select:none;
+
+}
+/* =========================================
+   Status Badges
+========================================= */
+
+.badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+
+}
+
+.badge.received{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+.badge.waiting{
+
+    background:#fee2e2;
+
+    color:#b91c1c;
+
+}
+
+.badge.distributed{
+
+    background:#dbeafe;
+
+    color:#1d4ed8;
+
+}
+
+.badge.pending{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+/* =========================================
+   KPI Animation
+========================================= */
+
+.kpi-card{
+
+    transition:
+        transform .25s,
+        box-shadow .25s;
+
+}
+
+.kpi-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 16px 36px rgba(0,0,0,.10);
+
+}
+
+/* =========================================
+   Scrollbar
+========================================= */
+
+.table-container::-webkit-scrollbar{
+
+    height:10px;
+
+}
+
+.table-container::-webkit-scrollbar-track{
+
+    background:#edf2f7;
+
+    border-radius:20px;
+
+}
+
+.table-container::-webkit-scrollbar-thumb{
+
+    background:#94a3b8;
+
+    border-radius:20px;
+
+}
+
+.table-container::-webkit-scrollbar-thumb:hover{
+
+    background:#64748b;
+
+}
+/* =========================================
+   Responsive
+========================================= */
+
+@media (max-width:1200px){
 
     .charts-grid{
 
@@ -615,11 +809,78 @@ tbody tr:hover{
     }
 
 }
-/* =========================
-   Mobile Table
-========================= */
+
+@media (max-width:992px){
+
+    .container{
+
+        padding:20px;
+
+    }
+
+    .header{
+
+        padding:0 18px;
+
+    }
+
+    .header-center h1{
+
+        font-size:24px;
+
+    }
+
+    .header-center p{
+
+        font-size:13px;
+
+    }
+
+    .kpi-grid{
+
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+    }
+
+}
 
 @media (max-width:768px){
+
+    .container{
+
+        padding:15px;
+
+    }
+
+    .navbar{
+
+        flex-direction:column;
+
+        gap:10px;
+
+    }
+
+    .nav-btn{
+
+        width:100%;
+
+    }
+
+    .table-toolbar{
+
+        flex-direction:column;
+
+    }
+
+    .table-toolbar input,
+
+    .table-toolbar select{
+
+        width:100%;
+
+        min-width:100%;
+
+    }
 
     #shipmentTable{
 
@@ -627,20 +888,86 @@ tbody tr:hover{
 
     }
 
-    #shipmentTable th,
-    #shipmentTable td{
+    #containerTable{
 
-        white-space:nowrap;
+        min-width:1500px;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    .header{
+
+        height:auto;
+
+        padding:15px;
+
+        flex-direction:column;
+
+        gap:10px;
 
     }
 
-    #shipmentTable td:nth-child(3),
-    #shipmentTable td:nth-child(4){
+    .header-left,
 
-        white-space:normal;
-        min-width:260px;
-        line-height:1.35;
+    .header-right{
+
+        width:auto;
 
     }
+
+    .header-center h1{
+
+        font-size:20px;
+
+    }
+
+    .header-center p{
+
+        font-size:12px;
+
+    }
+
+    .kpi-value{
+
+        font-size:34px;
+
+    }
+
+    .chart-body{
+
+        height:280px;
+
+    }
+
+}
+
+/* =========================================
+   Utilities
+========================================= */
+
+.text-center{
+
+    text-align:center;
+
+}
+
+.text-right{
+
+    text-align:right;
+
+}
+
+.text-left{
+
+    text-align:left;
+
+}
+
+.hidden{
+
+    display:none !important;
 
 }
