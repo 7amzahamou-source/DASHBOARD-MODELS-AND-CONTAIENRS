@@ -22,30 +22,46 @@
 
     <div class="header-left">
 
-        <button class="menu-btn" id="menuBtn">
+        <button
+            class="menu-btn"
+            id="menuBtn">
+
             ☰
+
         </button>
 
     </div>
 
     <div class="header-center">
 
-        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
+        <h1>
 
-        <p>قسم اللوجستيك</p>
+            الشركة الأساسية للإلكترونيات المحدودة
+
+        </h1>
+
+        <p>
+
+            قسم اللوجستيك
+
+        </p>
 
     </div>
 
-    <div class="header-right"></div>
+    <div class="header-right">
+
+    </div>
 
 </header>
 
-<!-- ================= NAVBAR ================= -->
+<!-- ================= NAVIGATION ================= -->
 
 <nav class="navbar">
 
     <button
+
         class="nav-btn active"
+
         id="dashboardBtn">
 
         📊 Dashboard
@@ -53,7 +69,9 @@
     </button>
 
     <button
+
         class="nav-btn"
+
         id="containersBtn">
 
         📦 Containers
@@ -66,80 +84,139 @@
 
 <main class="container">
 
-<!-- ================= DASHBOARD PAGE ================= -->
+<!-- ================= DASHBOARD ================= -->
 
 <section id="dashboardPage">
 
 <h2>Dashboard</h2>
 
+<!-- KPI -->
+
 <div class="kpi-grid">
 
     <div class="kpi-card shipments">
 
-    <div class="kpi-icon">📦</div>
+        <div class="kpi-icon">
 
-    <div class="kpi-content">
+            📦
 
-        <div class="kpi-value" id="totalShipments">0</div>
+        </div>
 
-        <div class="kpi-title">Total Shipments</div>
+        <div class="kpi-content">
+
+            <div
+                class="kpi-value"
+                id="totalShipments">
+
+                0
+
+            </div>
+
+            <div class="kpi-title">
+
+                Total Shipments
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="kpi-card containers">
+
+        <div class="kpi-icon">
+
+            🚢
+
+        </div>
+
+        <div class="kpi-content">
+
+            <div
+                class="kpi-value"
+                id="totalContainers">
+
+                0
+
+            </div>
+
+            <div class="kpi-title">
+
+                Total Containers
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="kpi-card arrived">
+
+        <div class="kpi-icon">
+
+            ✅
+
+        </div>
+
+        <div class="kpi-content">
+
+            <div
+                class="kpi-value"
+                id="containersArrived">
+
+                0
+
+            </div>
+
+            <div class="kpi-title">
+
+                Containers Arrived
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="kpi-card sea">
+
+        <div class="kpi-icon">
+
+            🌊
+
+        </div>
+
+        <div class="kpi-content">
+
+            <div
+                class="kpi-value"
+                id="containersOnSea">
+
+                0
+
+            </div>
+
+            <div class="kpi-title">
+
+                Containers On Sea
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
-
-<div class="kpi-card containers">
-
-    <div class="kpi-icon">🚢</div>
-
-    <div class="kpi-content">
-
-        <div class="kpi-value" id="totalContainers">0</div>
-
-        <div class="kpi-title">Total Containers</div>
-
-    </div>
-
-</div>
-
-<div class="kpi-card arrived">
-
-    <div class="kpi-icon">✅</div>
-
-    <div class="kpi-content">
-
-        <div class="kpi-value" id="containersArrived">0</div>
-
-        <div class="kpi-title">Containers Arrived</div>
-
-    </div>
-
-</div>
-
-<div class="kpi-card sea">
-
-    <div class="kpi-icon">🌊</div>
-
-    <div class="kpi-content">
-
-        <div class="kpi-value" id="containersOnSea">0</div>
-
-        <div class="kpi-title">Containers On Sea</div>
-
-    </div>
-
-</div>
-
-</div>
-
-<!-- Charts -->
+<!-- ================= CHARTS ================= -->
 
 <div class="charts-grid">
 
     <div class="chart-card">
 
         <div class="chart-title">
+
             Containers by ETA Month
+
         </div>
 
         <div class="chart-body">
@@ -153,7 +230,9 @@
     <div class="chart-card">
 
         <div class="chart-title">
+
             Top 3 Factories
+
         </div>
 
         <div class="chart-body">
@@ -174,32 +253,32 @@
 
 <div class="table-toolbar">
 
-<input
-type="text"
-id="searchInput"
-placeholder="Search Entry, Factory, Model, ETA...">
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search Entry, Factory, Model, ETA...">
 
-<select id="departmentFilter">
-<option value="">All Departments</option>
-</select>
+    <select id="departmentFilter">
+        <option value="">All Departments</option>
+    </select>
 
-<select id="polFilter">
-<option value="">All POL</option>
-</select>
+    <select id="polFilter">
+        <option value="">All POL</option>
+    </select>
 
-<select id="podFilter">
-<option value="">All POD</option>
-</select>
+    <select id="podFilter">
+        <option value="">All POD</option>
+    </select>
 
-<select id="factoryFilter">
-<option value="">All Factories</option>
-</select>
+    <select id="factoryFilter">
+        <option value="">All Factories</option>
+    </select>
 
-<select id="statusFilter">
-<option value="">All Shipments</option>
-<option value="sea">🚢 On Sea</option>
-<option value="arrived">✅ Arrived</option>
-</select>
+    <select id="statusFilter">
+        <option value="">All Shipments</option>
+        <option value="sea">🚢 On Sea</option>
+        <option value="arrived">✅ Arrived</option>
+    </select>
 
 </div>
 
@@ -256,58 +335,55 @@ placeholder="Search Entry, Factory, Model, ETA...">
 </div>
 
 </section>
-
 </section>
 
 <!-- ================= CONTAINERS PAGE ================= -->
 
 <section id="containersPage" style="display:none;">
 
-    <h2>Containers</h2>
+<h2>Containers</h2>
 
-    <!-- KPI Cards -->
+<!-- KPI Cards -->
 
-    <div class="kpi-grid">
+<div class="kpi-grid">
 
-        <div class="kpi-card">
+    <div class="kpi-card">
 
-            <div class="kpi-value" id="containerTotal">0</div>
+        <div class="kpi-value" id="containerTotal">0</div>
 
-            <div class="kpi-title">Total Containers</div>
-
-        </div>
-
-        <div class="kpi-card">
-
-            <div class="kpi-value" id="containerReceived">0</div>
-
-            <div class="kpi-title">Received Containers</div>
-
-        </div>
-
-        <div class="kpi-card">
-
-            <div class="kpi-value" id="containerWaiting">0</div>
-
-            <div class="kpi-title">Not Received</div>
-
-        </div>
-
-        <div class="kpi-card">
-
-            <div class="kpi-value" id="containerDistributed">0</div>
-
-            <div class="kpi-title">Not Distributed</div>
-
-        </div>
+        <div class="kpi-title">Total Containers</div>
 
     </div>
 
-    <!-- Charts -->
+    <div class="kpi-card">
+
+        <div class="kpi-value" id="containerReceived">0</div>
+
+        <div class="kpi-title">Received Containers</div>
+
+    </div>
+
+    <div class="kpi-card">
+
+        <div class="kpi-value" id="containerWaiting">0</div>
+
+        <div class="kpi-title">Not Received</div>
+
+    </div>
+
+    <div class="kpi-card">
+
+        <div class="kpi-value" id="containerDistributed">0</div>
+
+        <div class="kpi-title">Waiting Distribution</div>
+
+    </div>
+
+</div>
+
+<!-- Charts -->
 
 <div class="charts-grid">
-
-    <!-- Containers by Warehouse -->
 
     <div class="chart-card">
 
@@ -325,8 +401,6 @@ placeholder="Search Entry, Factory, Model, ETA...">
 
     </div>
 
-    <!-- Received / Not Received by Warehouse -->
-
     <div class="chart-card">
 
         <div class="chart-title">
@@ -343,104 +417,101 @@ placeholder="Search Entry, Factory, Model, ETA...">
 
     </div>
 
- </div>
-<br>
+</div>
 
+<!-- Filters -->
 
-    <!-- Filters -->
+<div class="table-toolbar">
 
-    <div class="table-toolbar">
+    <input
+        type="text"
+        id="containerSearch"
+        placeholder="Search Container, Entry, Model...">
 
-        <input
-            type="text"
-            id="containerSearch"
-            placeholder="Search Container, Entry, Model...">
+    <select id="warehouseFilter">
+        <option value="">All Warehouses</option>
+    </select>
 
-        <select id="warehouseFilter">
-            <option value="">All Warehouses</option>
-        </select>
+    <select id="departmentContainerFilter">
+        <option value="">All Departments</option>
+    </select>
 
-        <select id="departmentContainerFilter">
-            <option value="">All Departments</option>
-        </select>
+    <select id="statusContainerFilter">
+        <option value="">All Status</option>
+        <option value="استلمت">Received</option>
+        <option value="غير مستلمة">Not Received</option>
+    </select>
 
-        <select id="statusContainerFilter">
-            <option value="">All Status</option>
-            <option value="استلمت">Received</option>
-            <option value="غير مستلمة">Not Received</option>
-        </select>
+    <select id="distributionFilter">
+        <option value="">All Distribution</option>
+        <option value="تم التوزيع">Distributed</option>
+        <option value="لم يتم">Waiting Distribution</option>
+    </select>
 
-        <select id="distributionFilter">
-            <option value="">All Distribution</option>
-            <option value="تم التوزيع">Distributed</option>
-            <option value="لم يتم">Waiting Distribution</option>
-        </select>
+    <input
+        type="date"
+        id="etaContainerFilter">
 
-        <input
-            type="date"
-            id="etaContainerFilter">
+</div>
 
-    </div>
+<!-- Table -->
 
-    <!-- Table -->
+<div class="table-container">
 
-    <div class="table-container">
+<table id="containerTable">
 
-        <table id="containerTable">
+<colgroup>
 
-            <colgroup>
+    <col style="width:8%">
+    <col style="width:6%">
+    <col style="width:12%">
+    <col style="width:28%">
+    <col style="width:7%">
+    <col style="width:10%">
+    <col style="width:10%">
+    <col style="width:11%">
+    <col style="width:4%">
+    <col style="width:4%">
 
-                <col style="width:8%">
-                <col style="width:6%">
-                <col style="width:12%">
-                <col style="width:28%">
-                <col style="width:7%">
-                <col style="width:10%">
-                <col style="width:10%">
-                <col style="width:11%">
-                <col style="width:4%">
-                <col style="width:4%">
+</colgroup>
 
-            </colgroup>
+<thead>
 
-            <thead>
+<tr>
 
-                <tr>
+    <th>Entry</th>
 
-                    <th>Entry</th>
+    <th>S/N</th>
 
-                    <th>S/N</th>
+    <th>Container</th>
 
-                    <th>Containers</th>
+    <th>Model</th>
 
-                    <th>Model</th>
+    <th>Qty</th>
 
-                    <th>Qty</th>
+    <th>ETA</th>
 
-                    <th>ETA</th>
+    <th>Warehouse</th>
 
-                    <th>Warehouse</th>
+    <th>Department</th>
 
-                    <th>Department</th>
+    <th>Status</th>
 
-                    <th>Status</th>
+    <th>Distribution</th>
 
-                    <th>Distribution</th>
+</tr>
 
-                </tr>
+</thead>
 
-            </thead>
+<tbody>
 
-            <tbody>
+</tbody>
 
-            </tbody>
+</table>
 
-        </table>
-
-    </div>
+</div>
 
 </section>
-
 </main>
 
 <!-- ========================= -->
