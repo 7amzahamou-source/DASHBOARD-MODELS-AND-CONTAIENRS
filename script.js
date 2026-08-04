@@ -427,9 +427,13 @@ function applyContainerFilters(){
 
     filteredContainers = data;
 
-    renderContainers(filteredContainers);
+     renderContainers(filteredContainers);
 
-    updateContainerKPIs(filteredContainers);
+     updateContainerKPIs(filteredContainers);
+
+     drawWarehouseChart(filteredContainers);
+
+     drawWarehouseStatusChart(filteredContainers);
 
 }
 // =========================================
@@ -1267,3 +1271,236 @@ containersBtn.addEventListener("click",()=>{
     loadContainers();
 
 });
+function drawWarehouseChart(data){
+
+}
+
+function drawWarehouseStatusChart(data){
+
+}
+// =========================================
+// Containers by Warehouse
+// =========================================
+
+function drawWarehouseChart(data){
+
+    const warehouses = {};
+
+    data.forEach(item=>{
+
+        const warehouse = String(item.warehouse || "-").trim();
+
+        if(!warehouses[warehouse]){
+
+            warehouses[warehouse] = new Set();
+
+        }
+
+        warehouses[warehouse].add(item.container);
+
+    });
+
+    const labels = Object.keys(warehouses);
+
+    const values = labels.map(x=>warehouses[x].size);
+
+    if(warehouseChart){
+
+        warehouseChart.destroy();
+
+    }
+
+    warehouseChart = new Chart(
+
+        document.getElementById("warehouseChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[{
+
+                    label:"Containers",
+
+                    data:values,
+
+                    backgroundColor:"#3b82f6",
+
+                    borderRadius:6
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    }
+
+                },
+
+                scales:{
+
+                    y:{
+                        beginAtZero:true,
+                        ticks:{
+                            precision:0
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+// =========================================
+// Received vs Not Received
+// =========================================
+
+function drawWarehouseStatusChart(data){
+
+    const warehouses = {};
+
+    data.forEach(item=>{
+
+        const warehouse =
+            String(item.warehouse || "-").trim();
+
+        if(!warehouses[warehouse]){
+
+            warehouses[warehouse]={
+
+                received:new Set(),
+
+                waiting:new Set()
+
+            };
+
+        }
+
+        if(String(item.status || "").trim()=="استلمت"){
+
+            warehouses[warehouse]
+                .received
+                .add(item.container);
+
+        }else{
+
+            warehouses[warehouse]
+                .waiting
+                .add(item.container);
+
+        }
+
+    });
+
+    const labels = Object.keys(warehouses);
+
+    const received = labels.map(
+
+        x=>warehouses[x].received.size
+
+    );
+
+    const waiting = labels.map(
+
+        x=>warehouses[x].waiting.size
+
+    );
+
+    if(warehouseStatusChart){
+
+        warehouseStatusChart.destroy();
+
+    }
+
+    warehouseStatusChart = new Chart(
+
+        document.getElementById("warehouseStatusChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[
+
+                    {
+
+                        label:"Received",
+
+                        data:received,
+
+                        backgroundColor:"#22c55e"
+
+                    },
+
+                    {
+
+                        label:"Not Received",
+
+                        data:waiting,
+
+                        backgroundColor:"#ef4444"
+
+                    }
+
+                ]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        position:"top"
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+                        stacked:false
+                    },
+
+                    y:{
+                        beginAtZero:true,
+                        ticks:{
+                            precision:0
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
