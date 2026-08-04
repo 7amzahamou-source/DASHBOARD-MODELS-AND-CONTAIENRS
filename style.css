@@ -348,6 +348,12 @@ input{
     -webkit-overflow-scrolling:touch;
 }
 
+#containerTable{
+
+    min-width:1450px;
+
+}
+
 /* =========================
    Shipments Table
 ========================= */
@@ -509,12 +515,16 @@ tbody tr:hover{
 
 #containerTable th:nth-child(7),
 #containerTable td:nth-child(7){
-    width:10%;
+
+    min-width:140px;
+
 }
 
 #containerTable th:nth-child(8),
 #containerTable td:nth-child(8){
-    width:12%;
+
+    min-width:150px;
+
 }
 
 #containerTable th:nth-child(9),
@@ -603,12 +613,6 @@ tbody tr:hover{
         grid-template-columns:1fr;
 
     }
-    
-    #containerTable{
-
-    min-width:1450px;
-
-}
 
 }
 /* =========================
