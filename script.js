@@ -9,6 +9,7 @@ const API_URL =
 // Variables
 // =========================================
 
+
 let shipments = [];
 
 let containers = [];
