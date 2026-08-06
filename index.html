@@ -347,37 +347,37 @@
 
 <div class="kpi-grid">
 
-    <div class="kpi-card">
+<div class="kpi-card">
 
-        <div class="kpi-value" id="containerTotal">0</div>
+    <div class="kpi-value" id="containerTotal">0</div>
 
-        <div class="kpi-title">Total Containers</div>
+    <div class="kpi-title">Total Containers</div>
 
-    </div>
+</div>
 
-    <div class="kpi-card">
+<div class="kpi-card">
 
-        <div class="kpi-value" id="containerReceived">0</div>
+    <div class="kpi-value" id="transitLocations">0</div>
 
-        <div class="kpi-title">Received Containers</div>
+    <div class="kpi-title">Transit Locations</div>
 
-    </div>
+</div>
 
-    <div class="kpi-card">
+<div class="kpi-card">
 
-        <div class="kpi-value" id="containerWaiting">0</div>
+    <div class="kpi-value" id="destinationPorts">0</div>
 
-        <div class="kpi-title">Not Received</div>
+    <div class="kpi-title">Destination Ports</div>
 
-    </div>
+</div>
 
-    <div class="kpi-card">
+<div class="kpi-card">
 
-        <div class="kpi-value" id="containerDistributed">0</div>
+    <div class="kpi-value" id="arrivingMonth">0</div>
 
-        <div class="kpi-title">Waiting Distribution</div>
+    <div class="kpi-title">Arriving This Month</div>
 
-    </div>
+</div>
 
 </div>
 
@@ -389,7 +389,7 @@
 
         <div class="chart-title">
 
-            Containers by Warehouse
+            Containers by Current Transit
 
         </div>
 
@@ -405,7 +405,7 @@
 
         <div class="chart-title">
 
-            Received / Not Received by Warehouse
+            Containers by Destination Port
 
         </div>
 
@@ -428,29 +428,17 @@
         id="containerSearch"
         placeholder="Search Container, Entry, Model...">
 
-    <select id="warehouseFilter">
-        <option value="">All Warehouses</option>
-    </select>
+    <select id="transitFilter">
+    <option value="">All Transit</option>
+</select>
 
-    <select id="departmentContainerFilter">
-        <option value="">All Departments</option>
-    </select>
+<select id="podContainerFilter">
+    <option value="">All Destination Ports</option>
+</select>
 
-    <select id="statusContainerFilter">
-        <option value="">All Status</option>
-        <option value="استلمت">Received</option>
-        <option value="غير مستلمة">Not Received</option>
-    </select>
-
-    <select id="distributionFilter">
-        <option value="">All Distribution</option>
-        <option value="تم التوزيع">Distributed</option>
-        <option value="لم يتم">Waiting Distribution</option>
-    </select>
-
-    <input
-        type="date"
-        id="etaContainerFilter">
+<input
+    type="date"
+    id="etaContainerFilter">
 
 </div>
 
@@ -462,16 +450,23 @@
 
 <colgroup>
 
-    <col style="width:8%">
-    <col style="width:6%">
-    <col style="width:12%">
-    <col style="width:28%">
-    <col style="width:7%">
-    <col style="width:10%">
-    <col style="width:10%">
-    <col style="width:11%">
-    <col style="width:4%">
-    <col style="width:4%">
+    <col style="width:8%">   <!-- Entry -->
+
+    <col style="width:5%">   <!-- SN -->
+
+    <col style="width:12%">  <!-- Container -->
+
+    <col style="width:24%">  <!-- Model -->
+
+    <col style="width:6%">   <!-- Qty -->
+
+    <col style="width:20%">  <!-- Route -->
+
+    <col style="width:12%">  <!-- Current Transit -->
+
+    <col style="width:6%">   <!-- POD -->
+
+    <col style="width:7%">   <!-- ETA -->
 
 </colgroup>
 
@@ -489,15 +484,15 @@
 
     <th>Qty</th>
 
+   <th>Route</th>
+
+   <th>Progress</th>
+
+   <th>Current Transit</th>
+
+    <th>POD</th>
+
     <th>ETA</th>
-
-    <th>Warehouse</th>
-
-    <th>Department</th>
-
-    <th>Status</th>
-
-    <th>Distribution</th>
 
 </tr>
 
@@ -510,9 +505,6 @@
 </table>
 
 </div>
-
-</section>
-</main>
 
 <!-- ========================= -->
 <!-- Chart.js -->
