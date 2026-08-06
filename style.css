@@ -971,3 +971,128 @@ tbody tr:hover{
     display:none !important;
 
 }
+/* ===========================
+   Route Timeline
+=========================== */
+
+.route-cell{
+
+    white-space:normal;
+
+    line-height:1.8;
+
+}
+
+.route-badge{
+
+    display:inline-block;
+
+    padding:6px 12px;
+
+    background:#dbeafe;
+
+    color:#1e40af;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    margin:3px;
+
+}
+
+.route-arrow{
+
+    color:#64748b;
+
+    font-size:16px;
+
+    margin:0 4px;
+
+}
+/* ===========================
+   Current Transit
+=========================== */
+
+.current-transit{
+
+    display:inline-block;
+
+    padding:7px 14px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+.current-transit.transit1{
+
+    background:#dbeafe;
+
+    color:#1d4ed8;
+
+}
+
+.current-transit.transit2{
+
+    background:#fef3c7;
+
+    color:#b45309;
+
+}
+
+.current-transit.transit3{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+/* ===========================
+   Progress Bar
+=========================== */
+
+.progress-bar{
+
+    width:120px;
+
+    height:8px;
+
+    background:#e5e7eb;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin-bottom:5px;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        #2563eb,
+        #22c55e
+    );
+
+    border-radius:20px;
+
+}
+
+.progress-text{
+
+    font-size:11px;
+
+    font-weight:600;
+
+    color:#475569;
+
+}
