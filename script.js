@@ -9,25 +9,20 @@ const API_URL =
 // Variables
 // =========================================
 
-
 let shipments = [];
-
 let containers = [];
 
+let filteredShipments = [];
 let filteredContainers = [];
 
 let monthChart = null;
-
 let factoryChart = null;
 
 let warehouseChart = null;
-
 let warehouseStatusChart = null;
 
 let etaAscending = true;
-
 let entryAscending = true;
-
 let qtyAscending = true;
 
 // =========================================
@@ -42,6 +37,24 @@ function getContainerCount(value){
 
 }
 
+function formatDate(date){
+
+    if(!date) return "";
+
+    const d = new Date(date);
+
+    if(isNaN(d)) return "";
+
+    return d.toLocaleDateString("en-GB",{
+
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+
+    });
+
+}
+
 // =========================================
 // Load Dashboard
 // =========================================
@@ -50,9 +63,13 @@ async function loadData(){
 
     try{
 
-        const response = await fetch(API_URL);
+        const response =
+            await fetch(API_URL);
 
-        shipments = await response.json();
+        shipments =
+            await response.json();
+
+        filteredShipments = [...shipments];
 
         populateDepartmentFilter(shipments);
 
@@ -70,7 +87,7 @@ async function loadData(){
 
         console.error(error);
 
-        alert("Unable to load Dashboard Data.");
+        alert("Unable to load dashboard.");
 
     }
 
@@ -90,9 +107,16 @@ async function loadContainers(){
         containers =
             await response.json();
 
-        fillContainerFilters(containers);
+        containers.sort((a,b)=>
+
+            new Date(a.eta) -
+            new Date(b.eta)
+
+        );
 
         filteredContainers = [...containers];
+
+        fillContainerFilters(filteredContainers);
 
         applyContainerFilters();
 
@@ -102,17 +126,858 @@ async function loadContainers(){
 
         console.error(error);
 
-        alert("Unable to load Containers.");
+        alert("Unable to load containers.");
 
     }
 
 }
 
 // =========================================
-// Start
+// Initial Load
 // =========================================
 
 loadData();
+// =========================================
+// Dashboard KPIs
+// =========================================
+
+function updateKPIs(data){
+
+    document.getElementById("totalShipments").textContent =
+        data.length.toLocaleString();
+
+    let totalContainers = 0;
+    let arrived = 0;
+    let sea = 0;
+
+    data.forEach(item=>{
+
+        const qty = getContainerCount(item.hq);
+
+        totalContainers += qty;
+
+        if(String(item.bayan || "").trim()){
+
+            arrived += qty;
+
+        }else{
+
+            sea += qty;
+
+        }
+
+    });
+
+    document.getElementById("totalContainers").textContent =
+        totalContainers.toLocaleString();
+
+    document.getElementById("containersArrived").textContent =
+        arrived.toLocaleString();
+
+    document.getElementById("containersOnSea").textContent =
+        sea.toLocaleString();
+
+}
+
+// =========================================
+// Dashboard Filters
+// =========================================
+
+function populateDepartmentFilter(data){
+
+    const select =
+        document.getElementById("departmentFilter");
+
+    select.innerHTML =
+        '<option value="">All Departments</option>';
+
+    [...new Set(
+
+        data.map(x=>x.department)
+            .filter(Boolean)
+
+    )]
+
+    .sort()
+
+    .forEach(item=>{
+
+        select.innerHTML +=
+            `<option value="${item}">${item}</option>`;
+
+    });
+
+}
+
+function populatePOLFilter(data){
+
+    const select =
+        document.getElementById("polFilter");
+
+    select.innerHTML =
+        '<option value="">All POL</option>';
+
+    [...new Set(
+
+        data.map(x=>x.pol)
+            .filter(Boolean)
+
+    )]
+
+    .sort()
+
+    .forEach(item=>{
+
+        select.innerHTML +=
+            `<option value="${item}">${item}</option>`;
+
+    });
+
+}
+
+function populatePODFilter(data){
+
+    const select =
+        document.getElementById("podFilter");
+
+    select.innerHTML =
+        '<option value="">All POD</option>';
+
+    [...new Set(
+
+        data.map(x=>x.pod)
+            .filter(Boolean)
+
+    )]
+
+    .sort()
+
+    .forEach(item=>{
+
+        select.innerHTML +=
+            `<option value="${item}">${item}</option>`;
+
+    });
+
+}
+
+function populateFactoryFilter(data){
+
+    const select =
+        document.getElementById("factoryFilter");
+
+    select.innerHTML =
+        '<option value="">All Factories</option>';
+
+    [...new Set(
+
+        data.map(x=>x.factory)
+            .filter(Boolean)
+
+    )]
+
+    .sort()
+
+    .forEach(item=>{
+
+        select.innerHTML +=
+            `<option value="${item}">${item}</option>`;
+
+    });
+
+}
+// =========================================
+// Apply Dashboard Filters
+// =========================================
+
+function applyFilters(){
+
+    let data = [...shipments];
+
+    const search =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+    const department =
+        document.getElementById("departmentFilter").value;
+
+    const pol =
+        document.getElementById("polFilter").value;
+
+    const pod =
+        document.getElementById("podFilter").value;
+
+    const factory =
+        document.getElementById("factoryFilter").value;
+
+    const status =
+        document.getElementById("statusFilter").value;
+
+    // =========================
+    // Search
+    // =========================
+
+    if(search){
+
+        data = data.filter(item=>
+
+            String(item.entry || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            String(item.factory || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            String(item.model || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            String(item.description || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            String(item.eta || "")
+                .toLowerCase()
+                .includes(search)
+
+        );
+
+    }
+
+    // =========================
+    // Department
+    // =========================
+
+    if(department){
+
+        data =
+            data.filter(item=>
+
+                item.department === department
+
+            );
+
+    }
+
+    // =========================
+    // POL
+    // =========================
+
+    if(pol){
+
+        data =
+            data.filter(item=>
+
+                item.pol === pol
+
+            );
+
+    }
+
+    // =========================
+    // POD
+    // =========================
+
+    if(pod){
+
+        data =
+            data.filter(item=>
+
+                item.pod === pod
+
+            );
+
+    }
+
+    // =========================
+    // Factory
+    // =========================
+
+    if(factory){
+
+        data =
+            data.filter(item=>
+
+                item.factory === factory
+
+            );
+
+    }
+
+    // =========================
+    // Shipment Status
+    // =========================
+
+    if(status === "sea"){
+
+        data =
+            data.filter(item=>
+
+                !String(item.bayan || "").trim()
+
+            );
+
+    }
+
+    if(status === "arrived"){
+
+        data =
+            data.filter(item=>
+
+                String(item.bayan || "").trim()
+
+            );
+
+    }
+
+    filteredShipments = data;
+
+    renderTable(filteredShipments);
+
+    updateKPIs(filteredShipments);
+
+    drawMonthChart(filteredShipments);
+
+    drawFactoryChart(filteredShipments);
+
+}
+// =========================================
+// Render Dashboard Table
+// =========================================
+
+function renderTable(data){
+
+    const tbody =
+        document.querySelector("#shipmentTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.forEach(item=>{
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+
+            <td>${item.entry || ""}</td>
+
+            <td>${item.factory || ""}</td>
+
+            <td>${item.model || ""}</td>
+
+            <td>${item.description || ""}</td>
+
+            <td style="text-align:center">
+
+                ${Number(item.qty || 0).toLocaleString()}
+
+            </td>
+
+            <td style="text-align:center">
+
+                ${item.etd || ""}
+
+            </td>
+
+            <td style="text-align:center">
+
+                ${item.eta || ""}
+
+            </td>
+
+            <td style="text-align:center">
+
+                ${item.pol || ""}
+
+            </td>
+
+            <td style="text-align:center">
+
+                ${item.pod || ""}
+
+            </td>
+
+        `;
+
+        tbody.appendChild(tr);
+
+    });
+
+}
+// =========================================
+// Dashboard Sorting
+// =========================================
+
+function sortByEntry(){
+
+    filteredShipments.sort((a,b)=>{
+
+        return entryAscending
+
+            ? String(a.entry).localeCompare(String(b.entry))
+
+            : String(b.entry).localeCompare(String(a.entry));
+
+    });
+
+    entryAscending = !entryAscending;
+
+    renderTable(filteredShipments);
+
+}
+
+function sortByQty(){
+
+    filteredShipments.sort((a,b)=>{
+
+        return qtyAscending
+
+            ? Number(a.qty)-Number(b.qty)
+
+            : Number(b.qty)-Number(a.qty);
+
+    });
+
+    qtyAscending = !qtyAscending;
+
+    renderTable(filteredShipments);
+
+}
+
+function sortByETA(){
+
+    filteredShipments.sort((a,b)=>{
+
+        return etaAscending
+
+            ? new Date(a.eta)-new Date(b.eta)
+
+            : new Date(b.eta)-new Date(a.eta);
+
+    });
+
+    etaAscending = !etaAscending;
+
+    renderTable(filteredShipments);
+
+}
+// =========================================
+// Dashboard Events
+// =========================================
+
+document.getElementById("searchInput")
+.addEventListener("input",applyFilters);
+
+document.getElementById("departmentFilter")
+.addEventListener("change",applyFilters);
+
+document.getElementById("polFilter")
+.addEventListener("change",applyFilters);
+
+document.getElementById("podFilter")
+.addEventListener("change",applyFilters);
+
+document.getElementById("factoryFilter")
+.addEventListener("change",applyFilters);
+
+document.getElementById("statusFilter")
+.addEventListener("change",applyFilters);
+
+document.getElementById("entryHeader")
+.addEventListener("click",sortByEntry);
+
+document.getElementById("qtyHeader")
+.addEventListener("click",sortByQty);
+
+document.getElementById("etaHeader")
+.addEventListener("click",sortByETA);
+// =========================================
+// Dashboard Charts
+// =========================================
+
+function drawMonthChart(data){
+
+    const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    const shipments = Array(12).fill(0);
+    const containersCount = Array(12).fill(0);
+
+    data.forEach(item=>{
+
+        if(!item.eta) return;
+
+        const d = new Date(item.eta);
+
+        if(isNaN(d)) return;
+
+        const m = d.getMonth();
+
+        shipments[m]++;
+
+        containersCount[m] += getContainerCount(item.hq);
+
+    });
+
+    if(monthChart){
+
+        monthChart.destroy();
+
+    }
+
+    monthChart = new Chart(
+
+        document.getElementById("monthChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:months,
+
+                datasets:[{
+
+                    label:"Containers",
+
+                    data:containersCount,
+
+                    backgroundColor:"#2563eb",
+
+                    borderRadius:8
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            afterLabel:function(context){
+
+                                return "Shipments : " +
+
+                                shipments[context.dataIndex];
+
+                            }
+
+                        }
+
+                    },
+
+                    legend:{
+
+                        display:false
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+// =========================================
+// Factory Chart
+// =========================================
+
+function drawFactoryChart(data){
+
+    const factories = {};
+
+    data.forEach(item=>{
+
+        const name = item.factory || "Unknown";
+
+        if(!factories[name]){
+
+            factories[name]={
+
+                shipments:0,
+
+                containers:0
+
+            };
+
+        }
+
+        factories[name].shipments++;
+
+        factories[name].containers +=
+
+            getContainerCount(item.hq);
+
+    });
+
+    const top =
+
+        Object.entries(factories)
+
+        .sort((a,b)=>
+
+            b[1].shipments-a[1].shipments
+
+        )
+
+        .slice(0,3);
+
+    const labels =
+        top.map(x=>x[0]);
+
+    const values =
+        top.map(x=>x[1].shipments);
+
+    const containerValues =
+        top.map(x=>x[1].containers);
+
+    if(factoryChart){
+
+        factoryChart.destroy();
+
+    }
+
+    factoryChart = new Chart(
+
+        document.getElementById("factoryChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:values,
+
+                    backgroundColor:"#22c55e",
+
+                    borderRadius:8
+
+                }]
+
+            },
+
+            options:{
+
+                indexAxis:"y",
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            afterLabel:function(context){
+
+                                return "Containers : "+
+
+                                containerValues[context.dataIndex];
+
+                            }
+
+                        }
+
+                    },
+
+                    legend:{
+
+                        display:false
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+// =========================================
+// Container KPIs
+// =========================================
+
+function updateContainerKPIs(data){
+
+    // Total Containers
+
+    document.getElementById("containerTotal").textContent =
+        data.length.toLocaleString();
+
+    // Transit Locations
+
+    const transitLocations = new Set();
+
+    data.forEach(item=>{
+
+        const current =
+
+            item.transit3 ||
+
+            item.transit2 ||
+
+            item.transit1;
+
+        if(current){
+
+            transitLocations.add(current);
+
+        }
+
+    });
+
+    document.getElementById("transitLocations").textContent =
+        transitLocations.size.toLocaleString();
+
+    // Destination Ports
+
+    const destinationPorts = new Set();
+
+    data.forEach(item=>{
+
+        if(item.pod){
+
+            destinationPorts.add(item.pod);
+
+        }
+
+    });
+
+    document.getElementById("destinationPorts").textContent =
+        destinationPorts.size.toLocaleString();
+
+    // Arriving This Month
+
+    const today = new Date();
+
+    const month = today.getMonth();
+
+    const year = today.getFullYear();
+
+    const arriving = data.filter(item=>{
+
+        if(!item.eta) return false;
+
+        const d = new Date(item.eta);
+
+        return d.getMonth() === month &&
+               d.getFullYear() === year;
+
+    });
+
+    document.getElementById("arrivingMonth").textContent =
+        arriving.length.toLocaleString();
+
+}
+
+// =========================================
+// Fill Container Filters
+// =========================================
+
+function fillContainerFilters(data){
+
+    const transit =
+        document.getElementById("transitFilter");
+
+    const pod =
+        document.getElementById("podContainerFilter");
+
+    transit.innerHTML =
+        '<option value="">All Transit</option>';
+
+    pod.innerHTML =
+        '<option value="">All Destination Ports</option>';
+
+    // Transit
+
+    const transitList =
+
+        [...new Set(
+
+            data.map(item=>
+
+                item.transit3 ||
+
+                item.transit2 ||
+
+                item.transit1
+
+            )
+
+            .filter(Boolean)
+
+        )]
+
+        .sort();
+
+    transitList.forEach(item=>{
+
+        transit.innerHTML +=
+
+        `<option value="${item}">${item}</option>`;
+
+    });
+
+    // POD
+
+    const podList =
+
+        [...new Set(
+
+            data.map(item=>item.pod)
+
+            .filter(Boolean)
+
+        )]
+
+        .sort();
+
+    podList.forEach(item=>{
+
+        pod.innerHTML +=
+
+        `<option value="${item}">${item}</option>`;
+
+    });
+
+}
 // =========================================
 // Render Containers
 // =========================================
@@ -126,29 +991,152 @@ function renderContainers(data){
 
     data.forEach(item=>{
 
-        const tr = document.createElement("tr");
+        // =========================
+        // Route
+        // =========================
+
+        const route = [];
+
+        if(item.transit1){
+
+            route.push(
+                `<span class="route-badge">${item.transit1}</span>`
+            );
+
+        }
+
+        if(item.transit2){
+
+            route.push(
+                `<span class="route-arrow">➜</span>
+                 <span class="route-badge">${item.transit2}</span>`
+            );
+
+        }
+
+        if(item.transit3){
+
+            route.push(
+                `<span class="route-arrow">➜</span>
+                 <span class="route-badge">${item.transit3}</span>`
+            );
+
+        }
+
+        // =========================
+        // Current Transit
+        // =========================
+
+        let currentTransit = "";
+        let currentClass = "";
+
+        if(item.transit3){
+
+            currentTransit = item.transit3;
+            currentClass = "transit3";
+
+        }
+        else if(item.transit2){
+
+            currentTransit = item.transit2;
+            currentClass = "transit2";
+
+        }
+        else{
+
+            currentTransit = item.transit1 || "";
+            currentClass = "transit1";
+
+        }
+
+        // =========================
+        // Progress
+        // =========================
+
+        const stops = [
+
+            item.transit1,
+            item.transit2,
+            item.transit3
+
+        ].filter(Boolean);
+
+        let completed = 1;
+
+        if(item.transit3){
+
+            completed = 3;
+
+        }
+        else if(item.transit2){
+
+            completed = 2;
+
+        }
+
+        const percent =
+            stops.length
+            ? Math.round((completed / stops.length) * 100)
+            : 0;
+
+        // =========================
+        // Row
+        // =========================
+
+        const tr =
+            document.createElement("tr");
 
         tr.innerHTML = `
 
-            <td>${item.entry}</td>
+            <td>${item.entry || ""}</td>
 
-            <td>${item.sn}</td>
+            <td>${item.sn || ""}</td>
 
-            <td>${item.container}</td>
+            <td>${item.container || ""}</td>
 
-            <td>${item.model || "-"}</td>
+            <td>${item.model || ""}</td>
 
             <td>${Number(item.qty || 0).toLocaleString()}</td>
 
-            <td>${item.eta}</td>
+            <td class="route-cell">
 
-            <td>${item.warehouse || "-"}</td>
+                ${route.join("")}
 
-            <td>${item.department || "-"}</td>
+            </td>
 
-            <td>${item.status || "-"}</td>
+            <td>
 
-            <td>${item.distribution || "-"}</td>
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        style="width:${percent}%">
+
+                    </div>
+
+                </div>
+
+                <div class="progress-text">
+
+                    ${percent}%
+
+                </div>
+
+            </td>
+
+            <td>
+
+                <span class="current-transit ${currentClass}">
+
+                    ${currentTransit}
+
+                </span>
+
+            </td>
+
+            <td>${item.pod || ""}</td>
+
+            <td>${item.eta || ""}</td>
 
         `;
 
@@ -158,135 +1146,6 @@ function renderContainers(data){
 
 }
 
-// =========================================
-// Container KPIs
-// =========================================
-
-function updateContainerKPIs(data){
-
-    const uniqueContainers = [
-
-        ...new Set(
-
-            data
-
-                .map(x=>x.container)
-
-                .filter(Boolean)
-
-        )
-
-    ];
-
-    document.getElementById("containerTotal").textContent =
-        uniqueContainers.length.toLocaleString();
-
-    const received = [
-
-        ...new Set(
-
-            data
-
-                .filter(x=>
-
-                    String(x.status || "").trim() === "استلمت"
-
-                )
-
-                .map(x=>x.container)
-
-        )
-
-    ];
-
-    document.getElementById("containerReceived").textContent =
-        received.length.toLocaleString();
-
-    document.getElementById("containerWaiting").textContent =
-        (uniqueContainers.length - received.length).toLocaleString();
-
-    const waitingDistribution = [
-
-        ...new Set(
-
-            data
-
-                .filter(x=>
-
-                    String(x.distribution || "").trim() !== "تم التوزيع"
-
-                )
-
-                .map(x=>x.container)
-
-        )
-
-    ];
-
-    document.getElementById("containerDistributed").textContent =
-        waitingDistribution.length.toLocaleString();
-
-}
-
-// =========================================
-// Fill Container Filters
-// =========================================
-
-function fillContainerFilters(data){
-
-    const warehouse =
-        document.getElementById("warehouseFilter");
-
-    const department =
-        document.getElementById("departmentContainerFilter");
-
-    warehouse.innerHTML =
-        '<option value="">All Warehouses</option>';
-
-    department.innerHTML =
-        '<option value="">All Departments</option>';
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.warehouse || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        warehouse.innerHTML +=
-
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.department || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        department.innerHTML +=
-
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
 // =========================================
 // Apply Container Filters
 // =========================================
@@ -301,29 +1160,19 @@ function applyContainerFilters(){
         .toLowerCase()
         .trim();
 
-    const warehouse =
-        document.getElementById("warehouseFilter")
+    const transit =
+        document.getElementById("transitFilter")
         .value;
 
-    const department =
-        document.getElementById("departmentContainerFilter")
-        .value;
-
-    const status =
-        document.getElementById("statusContainerFilter")
-        .value;
-
-    const distribution =
-        document.getElementById("distributionFilter")
+    const pod =
+        document.getElementById("podContainerFilter")
         .value;
 
     const eta =
         document.getElementById("etaContainerFilter")
         .value;
 
-    // =========================
     // Search
-    // =========================
 
     if(search){
 
@@ -331,99 +1180,49 @@ function applyContainerFilters(){
 
             String(item.entry || "").toLowerCase().includes(search) ||
 
-            String(item.container || "").toLowerCase().includes(search) ||
-
-            String(item.model || "").toLowerCase().includes(search) ||
-
             String(item.sn || "").toLowerCase().includes(search) ||
 
-            String(item.warehouse || "").toLowerCase().includes(search) ||
+            String(item.container || "").toLowerCase().includes(search) ||
 
-            String(item.department || "").toLowerCase().includes(search)
+            String(item.model || "").toLowerCase().includes(search)
 
         );
 
     }
 
-    // =========================
-    // Warehouse
-    // =========================
+    // Transit
 
-    if(warehouse){
+    if(transit){
+
+        data = data.filter(item=>{
+
+            const current =
+
+                item.transit3 ||
+
+                item.transit2 ||
+
+                item.transit1;
+
+            return current === transit;
+
+        });
+
+    }
+
+    // POD
+
+    if(pod){
 
         data = data.filter(item=>
 
-            item.warehouse === warehouse
+            item.pod === pod
 
         );
 
     }
 
-    // =========================
-    // Department
-    // =========================
-
-    if(department){
-
-        data = data.filter(item=>
-
-            item.department === department
-
-        );
-
-    }
-
-    // =========================
-    // Status
-    // =========================
-
-    if(status === "استلمت"){
-
-        data = data.filter(item=>
-
-            String(item.status || "").trim() === "استلمت"
-
-        );
-
-    }
-
-    if(status === "غير مستلمة"){
-
-        data = data.filter(item=>
-
-            String(item.status || "").trim() !== "استلمت"
-
-        );
-
-    }
-
-    // =========================
-    // Distribution
-    // =========================
-
-    if(distribution === "تم التوزيع"){
-
-        data = data.filter(item=>
-
-            String(item.distribution || "").trim() === "تم التوزيع"
-
-        );
-
-    }
-
-    if(distribution === "لم يتم"){
-
-        data = data.filter(item=>
-
-            String(item.distribution || "").trim() !== "تم التوزيع"
-
-        );
-
-    }
-
-    // =========================
     // ETA
-    // =========================
 
     if(eta){
 
@@ -453,64 +1252,42 @@ function applyContainerFilters(){
 
     updateContainerKPIs(filteredContainers);
 
-    drawWarehouseChart(filteredContainers);
+    drawTransitChart(filteredContainers);
 
-    drawWarehouseStatusChart(filteredContainers);
+    drawDestinationChart(filteredContainers);
 
 }
 // =========================================
-// Container Events
+// Containers by Current Transit
 // =========================================
 
-document
-.getElementById("containerSearch")
-.addEventListener("input", applyContainerFilters);
+function drawTransitChart(data){
 
-document
-.getElementById("warehouseFilter")
-.addEventListener("change", applyContainerFilters);
-
-document
-.getElementById("departmentContainerFilter")
-.addEventListener("change", applyContainerFilters);
-
-document
-.getElementById("statusContainerFilter")
-.addEventListener("change", applyContainerFilters);
-
-document
-.getElementById("distributionFilter")
-.addEventListener("change", applyContainerFilters);
-
-document
-.getElementById("etaContainerFilter")
-.addEventListener("change", applyContainerFilters);
-
-// =========================================
-// Containers by Warehouse
-// =========================================
-
-function drawWarehouseChart(data){
-
-    const warehouses = {};
+    const transit = {};
 
     data.forEach(item=>{
 
-        const warehouse = String(item.warehouse || "-").trim();
+        const current =
 
-        if(!warehouses[warehouse]){
+            item.transit3 ||
 
-            warehouses[warehouse] = new Set();
+            item.transit2 ||
 
-        }
+            item.transit1;
 
-        warehouses[warehouse].add(item.container);
+        if(!current) return;
+
+        transit[current] =
+
+            (transit[current] || 0) + 1;
 
     });
 
-    const labels = Object.keys(warehouses);
+    const labels =
+        Object.keys(transit);
 
-    const values = labels.map(x=>warehouses[x].size);
+    const values =
+        Object.values(transit);
 
     if(warehouseChart){
 
@@ -528,7 +1305,7 @@ function drawWarehouseChart(data){
 
             data:{
 
-                labels:labels,
+                labels,
 
                 datasets:[{
 
@@ -536,9 +1313,9 @@ function drawWarehouseChart(data){
 
                     data:values,
 
-                    backgroundColor:"#3b82f6",
+                    backgroundColor:"#2563eb",
 
-                    borderRadius:6
+                    borderRadius:8
 
                 }]
 
@@ -561,13 +1338,7 @@ function drawWarehouseChart(data){
                 scales:{
 
                     y:{
-
-                        beginAtZero:true,
-
-                        ticks:{
-                            precision:0
-                        }
-
+                        beginAtZero:true
                     }
 
                 }
@@ -581,53 +1352,28 @@ function drawWarehouseChart(data){
 }
 
 // =========================================
-// Received vs Not Received
+// Containers by Destination Port
 // =========================================
 
-function drawWarehouseStatusChart(data){
+function drawDestinationChart(data){
 
-    const warehouses = {};
+    const ports = {};
 
     data.forEach(item=>{
 
-        const warehouse =
-            String(item.warehouse || "-").trim();
+        if(!item.pod) return;
 
-        if(!warehouses[warehouse]){
+        ports[item.pod] =
 
-            warehouses[warehouse] = {
-
-                received:new Set(),
-
-                waiting:new Set()
-
-            };
-
-        }
-
-        if(String(item.status || "").trim() === "استلمت"){
-
-            warehouses[warehouse]
-                .received
-                .add(item.container);
-
-        }else{
-
-            warehouses[warehouse]
-                .waiting
-                .add(item.container);
-
-        }
+            (ports[item.pod] || 0) + 1;
 
     });
 
-    const labels = Object.keys(warehouses);
+    const labels =
+        Object.keys(ports);
 
-    const received =
-        labels.map(x=>warehouses[x].received.size);
-
-    const waiting =
-        labels.map(x=>warehouses[x].waiting.size);
+    const values =
+        Object.values(ports);
 
     if(warehouseStatusChart){
 
@@ -641,506 +1387,7 @@ function drawWarehouseStatusChart(data){
 
         {
 
-            type:"bar",
-
-            data:{
-
-                labels:labels,
-
-                datasets:[
-
-                    {
-
-                        label:"Received",
-
-                        data:received,
-
-                        backgroundColor:"#22c55e"
-
-                    },
-
-                    {
-
-                        label:"Not Received",
-
-                        data:waiting,
-
-                        backgroundColor:"#ef4444"
-
-                    }
-
-                ]
-
-            },
-
-            options:{
-
-                responsive:true,
-
-                maintainAspectRatio:false,
-
-                plugins:{
-
-                    legend:{
-                        position:"top"
-                    }
-
-                },
-
-                scales:{
-
-                    y:{
-
-                        beginAtZero:true,
-
-                        ticks:{
-                            precision:0
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    );
-
-}
-// =========================================
-// Render Shipments Table
-// =========================================
-
-function renderTable(data){
-
-    const tbody =
-        document.querySelector("#shipmentTable tbody");
-
-    tbody.innerHTML = "";
-
-    data.forEach(item=>{
-
-        tbody.innerHTML += `
-
-        <tr>
-
-            <td>${item.entry}</td>
-
-            <td>${item.factory}</td>
-
-            <td>${item.model}</td>
-
-            <td>${item.description}</td>
-
-            <td>${Number(item.qty || 0).toLocaleString()}</td>
-
-            <td>${item.etd}</td>
-
-            <td>${item.eta}</td>
-
-            <td>${item.pol}</td>
-
-            <td>${item.pod}</td>
-
-        </tr>
-
-        `;
-
-    });
-
-}
-
-// =========================================
-// Dashboard Filters
-// =========================================
-
-function populateDepartmentFilter(data){
-
-    const select =
-        document.getElementById("departmentFilter");
-
-    select.innerHTML =
-        '<option value="">All Departments</option>';
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.department || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        select.innerHTML +=
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
-
-function populatePOLFilter(data){
-
-    const select =
-        document.getElementById("polFilter");
-
-    select.innerHTML =
-        '<option value="">All POL</option>';
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.pol || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        select.innerHTML +=
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
-
-function populatePODFilter(data){
-
-    const select =
-        document.getElementById("podFilter");
-
-    select.innerHTML =
-        '<option value="">All POD</option>';
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.pod || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        select.innerHTML +=
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
-
-function populateFactoryFilter(data){
-
-    const select =
-        document.getElementById("factoryFilter");
-
-    select.innerHTML =
-        '<option value="">All Factories</option>';
-
-    [...new Set(
-
-        data
-
-            .map(x=>String(x.factory || "").trim())
-
-            .filter(Boolean)
-
-    )]
-
-    .sort()
-
-    .forEach(item=>{
-
-        select.innerHTML +=
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
-// =========================================
-// Apply Dashboard Filters
-// =========================================
-
-function applyFilters(){
-
-    let data = [...shipments];
-
-    const search =
-        document.getElementById("searchInput")
-        .value
-        .toLowerCase()
-        .trim();
-
-    const department =
-        document.getElementById("departmentFilter")
-        .value;
-
-    const pol =
-        document.getElementById("polFilter")
-        .value;
-
-    const pod =
-        document.getElementById("podFilter")
-        .value;
-
-    const factory =
-        document.getElementById("factoryFilter")
-        .value;
-
-    const status =
-        document.getElementById("statusFilter")
-        .value;
-
-    // =========================
-    // Search
-    // =========================
-
-    if(search){
-
-        data = data.filter(item=>
-
-            String(item.entry || "").toLowerCase().includes(search) ||
-
-            String(item.factory || "").toLowerCase().includes(search) ||
-
-            String(item.model || "").toLowerCase().includes(search) ||
-
-            String(item.description || "").toLowerCase().includes(search) ||
-
-            String(item.eta || "").toLowerCase().includes(search)
-
-        );
-
-    }
-
-    // =========================
-    // Department
-    // =========================
-
-    if(department){
-
-        data = data.filter(item=>
-
-            item.department === department
-
-        );
-
-    }
-
-    // =========================
-    // POL
-    // =========================
-
-    if(pol){
-
-        data = data.filter(item=>
-
-            item.pol === pol
-
-        );
-
-    }
-
-    // =========================
-    // POD
-    // =========================
-
-    if(pod){
-
-        data = data.filter(item=>
-
-            item.pod === pod
-
-        );
-
-    }
-
-    // =========================
-    // Factory
-    // =========================
-
-    if(factory){
-
-        data = data.filter(item=>
-
-            item.factory === factory
-
-        );
-
-    }
-
-    // =========================
-    // Shipment Status
-    // =========================
-
-    if(status==="sea"){
-
-        data = data.filter(item=>
-
-            String(item.bayan || "").trim()===""
-
-        );
-
-    }
-
-    if(status==="arrived"){
-
-        data = data.filter(item=>
-
-            String(item.bayan || "").trim()!==""
-
-        );
-
-    }
-
-    renderTable(data);
-
-    updateKPIs(data);
-
-    drawMonthChart(data);
-
-    drawFactoryChart(data);
-
-}
-
-// =========================================
-// Dashboard Events
-// =========================================
-
-document
-.getElementById("searchInput")
-.addEventListener("input",applyFilters);
-
-document
-.getElementById("departmentFilter")
-.addEventListener("change",applyFilters);
-
-document
-.getElementById("polFilter")
-.addEventListener("change",applyFilters);
-
-document
-.getElementById("podFilter")
-.addEventListener("change",applyFilters);
-
-document
-.getElementById("factoryFilter")
-.addEventListener("change",applyFilters);
-
-document
-.getElementById("statusFilter")
-.addEventListener("change",applyFilters);
-// =========================================
-// Dashboard KPIs
-// =========================================
-
-function updateKPIs(data){
-
-    const shipmentCount = data.length;
-
-    const totalContainers = data.reduce((sum,item)=>{
-
-        return sum + getContainerCount(item.hq);
-
-    },0);
-
-    const arrivedContainers = data.reduce((sum,item)=>{
-
-        if(String(item.bayan || "").trim()!==""){
-
-            return sum + getContainerCount(item.hq);
-
-        }
-
-        return sum;
-
-    },0);
-
-    const seaContainers =
-        totalContainers - arrivedContainers;
-
-    document.getElementById("totalShipments").textContent =
-        shipmentCount.toLocaleString();
-
-    document.getElementById("totalContainers").textContent =
-        totalContainers.toLocaleString();
-
-    document.getElementById("containersArrived").textContent =
-        arrivedContainers.toLocaleString();
-
-    document.getElementById("containersOnSea").textContent =
-        seaContainers.toLocaleString();
-
-}
-
-// =========================================
-// Containers by ETA Month
-// =========================================
-
-function drawMonthChart(data){
-
-    const months = {};
-
-    data.forEach(item=>{
-
-        if(!item.eta) return;
-
-        const month =
-            item.eta.substring(3,6);
-
-        if(!months[month]){
-
-            months[month]={
-
-                shipments:0,
-
-                containers:0
-
-            };
-
-        }
-
-        months[month].shipments++;
-
-        months[month].containers +=
-            getContainerCount(item.hq);
-
-    });
-
-    const labels = Object.keys(months);
-
-    const shipments =
-        labels.map(x=>months[x].shipments);
-
-    const containers =
-        labels.map(x=>months[x].containers);
-
-    if(monthChart){
-
-        monthChart.destroy();
-
-    }
-
-    monthChart = new Chart(
-
-        document.getElementById("monthChart"),
-
-        {
-
-            type:"bar",
+            type:"doughnut",
 
             data:{
 
@@ -1148,13 +1395,20 @@ function drawMonthChart(data){
 
                 datasets:[{
 
-                    label:"Shipments",
+                    data:values,
 
-                    data:shipments,
+                    backgroundColor:[
 
-                    containers,
+                        "#2563eb",
+                        "#22c55e",
+                        "#f59e0b",
+                        "#ef4444",
+                        "#8b5cf6",
+                        "#06b6d4",
+                        "#14b8a6",
+                        "#64748b"
 
-                    backgroundColor:"#3b82f6"
+                    ]
 
                 }]
 
@@ -1169,25 +1423,7 @@ function drawMonthChart(data){
                 plugins:{
 
                     legend:{
-                        display:false
-                    },
-
-                    tooltip:{
-
-                        callbacks:{
-
-                            afterLabel:function(context){
-
-                                return "Containers : " +
-
-                                context.dataset.containers[
-                                    context.dataIndex
-                                ];
-
-                            }
-
-                        }
-
+                        position:"bottom"
                     }
 
                 }
@@ -1201,262 +1437,66 @@ function drawMonthChart(data){
 }
 
 // =========================================
-// Top 3 Factories
+// Container Events
 // =========================================
 
-function drawFactoryChart(data){
+document.getElementById("containerSearch")
+.addEventListener("input",applyContainerFilters);
 
-    const factories = {};
+document.getElementById("transitFilter")
+.addEventListener("change",applyContainerFilters);
 
-    data.forEach(item=>{
+document.getElementById("podContainerFilter")
+.addEventListener("change",applyContainerFilters);
 
-        const name =
-            String(item.factory || "").trim();
-
-        if(!name) return;
-
-        if(!factories[name]){
-
-            factories[name]={
-
-                shipments:0,
-
-                containers:0
-
-            };
-
-        }
-
-        factories[name].shipments++;
-
-        factories[name].containers +=
-            getContainerCount(item.hq);
-
-    });
-
-    const sorted = Object.entries(factories)
-
-        .sort((a,b)=>
-
-            b[1].shipments -
-            a[1].shipments
-
-        )
-
-        .slice(0,3);
-
-    const labels =
-        sorted.map(x=>x[0]);
-
-    const shipments =
-        sorted.map(x=>x[1].shipments);
-
-    const containers =
-        sorted.map(x=>x[1].containers);
-
-    if(factoryChart){
-
-        factoryChart.destroy();
-
-    }
-
-    factoryChart = new Chart(
-
-        document.getElementById("factoryChart"),
-
-        {
-
-            type:"bar",
-
-            data:{
-
-                labels,
-
-                datasets:[{
-
-                    label:"Shipments",
-
-                    data:shipments,
-
-                    containers,
-
-                    backgroundColor:"#14b8a6"
-
-                }]
-
-            },
-
-            options:{
-
-                indexAxis:"y",
-
-                responsive:true,
-
-                maintainAspectRatio:false,
-
-                plugins:{
-
-                    legend:{
-                        display:false
-                    },
-
-                    tooltip:{
-
-                        callbacks:{
-
-                            afterLabel:function(context){
-
-                                return "Containers : " +
-
-                                context.dataset.containers[
-                                    context.dataIndex
-                                ];
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    );
-
-}
-// =========================================
-// Sort Entry
-// =========================================
-
-document
-.getElementById("entryHeader")
-.addEventListener("click",()=>{
-
-    shipments.sort((a,b)=>{
-
-        return entryAscending
-
-            ? String(a.entry).localeCompare(
-                String(b.entry),
-                undefined,
-                {numeric:true}
-              )
-
-            : String(b.entry).localeCompare(
-                String(a.entry),
-                undefined,
-                {numeric:true}
-              );
-
-    });
-
-    entryAscending = !entryAscending;
-
-    applyFilters();
-
-});
-
-// =========================================
-// Sort Qty
-// =========================================
-
-document
-.getElementById("qtyHeader")
-.addEventListener("click",()=>{
-
-    shipments.sort((a,b)=>{
-
-        return qtyAscending
-
-            ? Number(a.qty)-Number(b.qty)
-
-            : Number(b.qty)-Number(a.qty);
-
-    });
-
-    qtyAscending = !qtyAscending;
-
-    applyFilters();
-
-});
-
-// =========================================
-// Sort ETA
-// =========================================
-
-document
-.getElementById("etaHeader")
-.addEventListener("click",()=>{
-
-    shipments.sort((a,b)=>{
-
-        const d1 = new Date(a.eta);
-
-        const d2 = new Date(b.eta);
-
-        return etaAscending
-
-            ? d1-d2
-
-            : d2-d1;
-
-    });
-
-    etaAscending = !etaAscending;
-
-    applyFilters();
-
-});
-
+document.getElementById("etaContainerFilter")
+.addEventListener("change",applyContainerFilters);
 // =========================================
 // Navigation
 // =========================================
 
+let containersLoaded = false;
+
 const dashboardBtn =
-document.getElementById("dashboardBtn");
+    document.getElementById("dashboardBtn");
 
 const containersBtn =
-document.getElementById("containersBtn");
+    document.getElementById("containersBtn");
 
 const dashboardPage =
-document.getElementById("dashboardPage");
+    document.getElementById("dashboardPage");
 
 const containersPage =
-document.getElementById("containersPage");
+    document.getElementById("containersPage");
+
+// Dashboard
 
 dashboardBtn.addEventListener("click",()=>{
 
-    dashboardPage.style.display="block";
-
-    containersPage.style.display="none";
-
     dashboardBtn.classList.add("active");
-
     containersBtn.classList.remove("active");
 
+    dashboardPage.style.display = "block";
+    containersPage.style.display = "none";
+
 });
+
+// Containers
 
 containersBtn.addEventListener("click",()=>{
 
-    dashboardPage.style.display="none";
-
-    containersPage.style.display="block";
-
+    containersBtn.classList.add("active");
     dashboardBtn.classList.remove("active");
 
-    containersBtn.classList.add("active");
+    dashboardPage.style.display = "none";
+    containersPage.style.display = "block";
 
-    loadContainers();
+    if(!containersLoaded){
+
+        loadContainers();
+
+        containersLoaded = true;
+
+    }
 
 });
-
-// =========================================
-// Initial State
-// =========================================
-
-dashboardPage.style.display = "block";
-
-containersPage.style.display = "none";
