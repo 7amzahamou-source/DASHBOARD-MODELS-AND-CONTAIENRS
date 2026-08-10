@@ -1,63 +1,163 @@
-// =========================================
+// =========================================================
+// LOGISTICS CONTROL TOWER
+// SCRIPT.JS
+// =========================================================
+
+
+// =========================================================
 // API
-// =========================================
+// =========================================================
 
 const API_URL =
 "https://script.google.com/macros/s/AKfycbyZIUvCUj4vLx35pg0sqMziD3tikSzVrLuaJagmneQJUoeCLxJ5V-grqQ1AqjZcic_LGg/exec";
 
-// =========================================
-// Variables
-// =========================================
+
+// =========================================================
+// DATA
+// =========================================================
 
 let shipments = [];
+
 let containers = [];
 
 let filteredShipments = [];
+
 let filteredContainers = [];
 
+
+// =========================================================
+// CHARTS
+// =========================================================
+
 let monthChart = null;
+
 let factoryChart = null;
 
-let warehouseChart = null;
 let warehouseStatusChart = null;
 
+
+// =========================================================
+// SORTING
+// =========================================================
+
 let etaAscending = true;
+
 let entryAscending = true;
+
 let qtyAscending = true;
 
-// =========================================
-// Helpers
-// =========================================
+
+// =========================================================
+// CONTAINERS PAGE
+// =========================================================
+
+let containersLoaded = false;
+
+
+// =========================================================
+// HELPERS
+// =========================================================
+
+// Keep container quantity exactly as it comes
+// from Google Sheets.
+//
+// Important:
+// A container can contain multiple models.
+//
+// Example:
+//
+// 800 400
+// 600 400 200
+//
+// Therefore DO NOT use Number() here.
+
+function formatQuantity(value){
+
+    if(value === null || value === undefined){
+
+        return "";
+
+    }
+
+    return String(value).trim();
+
+}
+
+
+// =========================================================
+// Container Count
+// =========================================================
+
+// Used only when we need the number of containers
+// represented by a MODELS row.
 
 function getContainerCount(value){
 
-    const match = String(value || "").match(/\d+/);
+    if(value === null || value === undefined){
 
-    return match ? Number(match[0]) : 0;
+        return 0;
+
+    }
+
+    const text =
+        String(value).trim();
+
+    if(!text){
+
+        return 0;
+
+    }
+
+    const numbers =
+        text.match(/\d+/g);
+
+    if(!numbers){
+
+        return 0;
+
+    }
+
+    return numbers.length;
 
 }
+
+
+// =========================================================
+// Date Helper
+// =========================================================
 
 function formatDate(date){
 
-    if(!date) return "";
+    if(!date){
 
-    const d = new Date(date);
+        return "";
 
-    if(isNaN(d)) return "";
+    }
 
-    return d.toLocaleDateString("en-GB",{
+    const d =
+        new Date(date);
 
-        day:"2-digit",
-        month:"short",
-        year:"numeric"
+    if(isNaN(d)){
 
-    });
+        return "";
+
+    }
+
+    return d.toLocaleDateString(
+        "en-GB",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
 
 }
 
-// =========================================
-// Load Dashboard
-// =========================================
+
+// =========================================================
+// LOAD DASHBOARD DATA
+// =========================================================
 
 async function loadData(){
 
@@ -66,18 +166,45 @@ async function loadData(){
         const response =
             await fetch(API_URL);
 
+        if(!response.ok){
+
+            throw new Error(
+                "Dashboard API request failed"
+            );
+
+        }
+
         shipments =
             await response.json();
 
-        filteredShipments = [...shipments];
+        if(!Array.isArray(shipments)){
 
-        populateDepartmentFilter(shipments);
+            throw new Error(
+                "Invalid dashboard data"
+            );
 
-        populatePOLFilter(shipments);
+        }
 
-        populatePODFilter(shipments);
+        filteredShipments =
+            [...shipments];
 
-        populateFactoryFilter(shipments);
+
+        populateDepartmentFilter(
+            shipments
+        );
+
+        populatePOLFilter(
+            shipments
+        );
+
+        populatePODFilter(
+            shipments
+        );
+
+        populateFactoryFilter(
+            shipments
+        );
+
 
         applyFilters();
 
@@ -85,38 +212,65 @@ async function loadData(){
 
     catch(error){
 
-        console.error(error);
-
-        alert("Unable to load dashboard.");
+        console.error(
+            "Dashboard Error:",
+            error
+        );
 
     }
 
 }
 
-// =========================================
-// Load Containers
-// =========================================
+
+// =========================================================
+// LOAD CONTAINERS DATA
+// =========================================================
 
 async function loadContainers(){
 
     try{
 
         const response =
-            await fetch(API_URL + "?sheet=CONTAINERS");
+            await fetch(
+                API_URL + "?sheet=CONTAINERS"
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                "Containers API request failed"
+            );
+
+        }
 
         containers =
             await response.json();
 
-        containers.sort((a,b)=>
+        if(!Array.isArray(containers)){
 
-            new Date(a.eta) -
-            new Date(b.eta)
+            throw new Error(
+                "Invalid containers data"
+            );
 
+        }
+
+
+        containers.sort((a,b)=>{
+
+            return new Date(a.eta) -
+                   new Date(b.eta);
+
+        });
+
+
+        filteredContainers =
+            [...containers];
+
+
+        fillContainerFilters(
+            filteredContainers
         );
 
-        filteredContainers = [...containers];
-
-        fillContainerFilters(filteredContainers);
 
         applyContainerFilters();
 
@@ -124,513 +278,736 @@ async function loadContainers(){
 
     catch(error){
 
-        console.error(error);
-
-        alert("Unable to load containers.");
+        console.error(
+            "Containers Error:",
+            error
+        );
 
     }
 
 }
 
-// =========================================
-// Initial Load
-// =========================================
+
+// =========================================================
+// INITIAL DASHBOARD LOAD
+// =========================================================
 
 loadData();
-// =========================================
-// Dashboard KPIs
-// =========================================
+// =========================================================
+// DASHBOARD KPIs
+// =========================================================
 
 function updateKPIs(data){
 
-    document.getElementById("totalShipments").textContent =
-        data.length.toLocaleString();
+    const totalShipments =
+        data.length;
 
     let totalContainers = 0;
+
     let arrived = 0;
+
     let sea = 0;
+
 
     data.forEach(item=>{
 
-        const qty = getContainerCount(item.hq);
+        const count =
+            getContainerCount(item.hq);
 
-        totalContainers += qty;
+        totalContainers += count;
 
-        if(String(item.bayan || "").trim()){
 
-            arrived += qty;
+        if(
+            String(item.bayan || "").trim()
+        ){
 
-        }else{
+            arrived += count;
 
-            sea += qty;
+        }
+        else{
+
+            sea += count;
 
         }
 
     });
 
-    document.getElementById("totalContainers").textContent =
+
+    document.getElementById(
+        "totalShipments"
+    ).textContent =
+        totalShipments.toLocaleString();
+
+
+    document.getElementById(
+        "totalContainers"
+    ).textContent =
         totalContainers.toLocaleString();
 
-    document.getElementById("containersArrived").textContent =
+
+    document.getElementById(
+        "containersArrived"
+    ).textContent =
         arrived.toLocaleString();
 
-    document.getElementById("containersOnSea").textContent =
+
+    document.getElementById(
+        "containersOnSea"
+    ).textContent =
         sea.toLocaleString();
 
 }
 
-// =========================================
-// Dashboard Filters
-// =========================================
+
+// =========================================================
+// DEPARTMENT FILTER
+// =========================================================
 
 function populateDepartmentFilter(data){
 
     const select =
-        document.getElementById("departmentFilter");
+        document.getElementById(
+            "departmentFilter"
+        );
 
-    select.innerHTML =
-        '<option value="">All Departments</option>';
 
-    [...new Set(
+    select.innerHTML = `
+        <option value="">
+            All Departments
+        </option>
+    `;
 
-        data.map(x=>x.department)
+
+    const values = [
+
+        ...new Set(
+
+            data
+            .map(item=>item.department)
             .filter(Boolean)
 
-    )]
+        )
 
-    .sort()
+    ].sort();
 
-    .forEach(item=>{
 
-        select.innerHTML +=
-            `<option value="${item}">${item}</option>`;
+    values.forEach(value=>{
+
+        select.innerHTML += `
+
+            <option value="${value}">
+                ${value}
+            </option>
+
+        `;
 
     });
 
 }
+
+
+// =========================================================
+// POL FILTER
+// =========================================================
 
 function populatePOLFilter(data){
 
     const select =
-        document.getElementById("polFilter");
+        document.getElementById(
+            "polFilter"
+        );
 
-    select.innerHTML =
-        '<option value="">All POL</option>';
 
-    [...new Set(
+    select.innerHTML = `
+        <option value="">
+            All POL
+        </option>
+    `;
 
-        data.map(x=>x.pol)
+
+    const values = [
+
+        ...new Set(
+
+            data
+            .map(item=>item.pol)
             .filter(Boolean)
 
-    )]
+        )
 
-    .sort()
+    ].sort();
 
-    .forEach(item=>{
 
-        select.innerHTML +=
-            `<option value="${item}">${item}</option>`;
+    values.forEach(value=>{
+
+        select.innerHTML += `
+
+            <option value="${value}">
+                ${value}
+            </option>
+
+        `;
 
     });
 
 }
+
+
+// =========================================================
+// POD FILTER
+// =========================================================
 
 function populatePODFilter(data){
 
     const select =
-        document.getElementById("podFilter");
+        document.getElementById(
+            "podFilter"
+        );
 
-    select.innerHTML =
-        '<option value="">All POD</option>';
 
-    [...new Set(
+    select.innerHTML = `
+        <option value="">
+            All POD
+        </option>
+    `;
 
-        data.map(x=>x.pod)
+
+    const values = [
+
+        ...new Set(
+
+            data
+            .map(item=>item.pod)
             .filter(Boolean)
 
-    )]
+        )
 
-    .sort()
+    ].sort();
 
-    .forEach(item=>{
 
-        select.innerHTML +=
-            `<option value="${item}">${item}</option>`;
+    values.forEach(value=>{
+
+        select.innerHTML += `
+
+            <option value="${value}">
+                ${value}
+            </option>
+
+        `;
 
     });
 
 }
+
+
+// =========================================================
+// FACTORY FILTER
+// =========================================================
 
 function populateFactoryFilter(data){
 
     const select =
-        document.getElementById("factoryFilter");
+        document.getElementById(
+            "factoryFilter"
+        );
 
-    select.innerHTML =
-        '<option value="">All Factories</option>';
 
-    [...new Set(
+    select.innerHTML = `
+        <option value="">
+            All Factories
+        </option>
+    `;
 
-        data.map(x=>x.factory)
+
+    const values = [
+
+        ...new Set(
+
+            data
+            .map(item=>item.factory)
             .filter(Boolean)
 
-    )]
+        )
 
-    .sort()
+    ].sort();
 
-    .forEach(item=>{
 
-        select.innerHTML +=
-            `<option value="${item}">${item}</option>`;
+    values.forEach(value=>{
+
+        select.innerHTML += `
+
+            <option value="${value}">
+                ${value}
+            </option>
+
+        `;
 
     });
 
 }
-// =========================================
-// Apply Dashboard Filters
-// =========================================
+// =========================================================
+// APPLY DASHBOARD FILTERS
+// =========================================================
 
 function applyFilters(){
 
     let data = [...shipments];
 
+
     const search =
-        document.getElementById("searchInput")
-        .value
+        document.getElementById(
+            "searchInput"
+        ).value
         .toLowerCase()
         .trim();
 
+
     const department =
-        document.getElementById("departmentFilter").value;
+        document.getElementById(
+            "departmentFilter"
+        ).value;
+
 
     const pol =
-        document.getElementById("polFilter").value;
+        document.getElementById(
+            "polFilter"
+        ).value;
+
 
     const pod =
-        document.getElementById("podFilter").value;
+        document.getElementById(
+            "podFilter"
+        ).value;
+
 
     const factory =
-        document.getElementById("factoryFilter").value;
+        document.getElementById(
+            "factoryFilter"
+        ).value;
+
 
     const status =
-        document.getElementById("statusFilter").value;
+        document.getElementById(
+            "statusFilter"
+        ).value;
 
-    // =========================
-    // Search
-    // =========================
+
+    // =====================================================
+    // SEARCH
+    // =====================================================
 
     if(search){
 
+        data = data.filter(item=>{
+
+            return (
+
+                String(item.entry || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.factory || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.model || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.description || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.eta || "")
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        });
+
+    }
+
+
+    // =====================================================
+    // DEPARTMENT
+    // =====================================================
+
+    if(department){
+
         data = data.filter(item=>
 
-            String(item.entry || "")
-                .toLowerCase()
-                .includes(search)
-
-            ||
-
-            String(item.factory || "")
-                .toLowerCase()
-                .includes(search)
-
-            ||
-
-            String(item.model || "")
-                .toLowerCase()
-                .includes(search)
-
-            ||
-
-            String(item.description || "")
-                .toLowerCase()
-                .includes(search)
-
-            ||
-
-            String(item.eta || "")
-                .toLowerCase()
-                .includes(search)
+            String(item.department || "") ===
+            String(department)
 
         );
 
     }
 
-    // =========================
-    // Department
-    // =========================
 
-    if(department){
-
-        data =
-            data.filter(item=>
-
-                item.department === department
-
-            );
-
-    }
-
-    // =========================
+    // =====================================================
     // POL
-    // =========================
+    // =====================================================
 
     if(pol){
 
-        data =
-            data.filter(item=>
+        data = data.filter(item=>
 
-                item.pol === pol
+            String(item.pol || "") ===
+            String(pol)
 
-            );
+        );
 
     }
 
-    // =========================
+
+    // =====================================================
     // POD
-    // =========================
+    // =====================================================
 
     if(pod){
 
-        data =
-            data.filter(item=>
+        data = data.filter(item=>
 
-                item.pod === pod
+            String(item.pod || "") ===
+            String(pod)
 
-            );
+        );
 
     }
 
-    // =========================
-    // Factory
-    // =========================
+
+    // =====================================================
+    // FACTORY
+    // =====================================================
 
     if(factory){
 
-        data =
-            data.filter(item=>
+        data = data.filter(item=>
 
-                item.factory === factory
+            String(item.factory || "") ===
+            String(factory)
 
-            );
+        );
 
     }
 
-    // =========================
-    // Shipment Status
-    // =========================
+
+    // =====================================================
+    // STATUS
+    // =====================================================
 
     if(status === "sea"){
 
-        data =
-            data.filter(item=>
+        data = data.filter(item=>
 
-                !String(item.bayan || "").trim()
+            !String(item.bayan || "").trim()
 
-            );
+        );
 
     }
+
 
     if(status === "arrived"){
 
-        data =
-            data.filter(item=>
+        data = data.filter(item=>
 
-                String(item.bayan || "").trim()
+            String(item.bayan || "").trim()
 
-            );
+        );
 
     }
 
-    filteredShipments = data;
 
-    renderTable(filteredShipments);
+    // =====================================================
+    // SAVE FILTERED DATA
+    // =====================================================
 
-    updateKPIs(filteredShipments);
+    filteredShipments =
+        data;
 
-    drawMonthChart(filteredShipments);
 
-    drawFactoryChart(filteredShipments);
+    // =====================================================
+    // RENDER
+    // =====================================================
+
+    renderTable(
+        filteredShipments
+    );
+
+
+    updateKPIs(
+        filteredShipments
+    );
+
+
+    drawMonthChart(
+        filteredShipments
+    );
+
+
+    drawFactoryChart(
+        filteredShipments
+    );
 
 }
-// =========================================
-// Render Dashboard Table
-// =========================================
+
+
+// =========================================================
+// RENDER SHIPMENTS TABLE
+// =========================================================
 
 function renderTable(data){
 
     const tbody =
-        document.querySelector("#shipmentTable tbody");
+        document.querySelector(
+            "#shipmentTable tbody"
+        );
+
 
     tbody.innerHTML = "";
+
 
     data.forEach(item=>{
 
         const tr =
             document.createElement("tr");
 
+
         tr.innerHTML = `
 
-            <td>${item.entry || ""}</td>
-
-            <td>${item.factory || ""}</td>
-
-            <td>${item.model || ""}</td>
-
-            <td>${item.description || ""}</td>
-
-            <td style="text-align:center">
-
-                ${Number(item.qty || 0).toLocaleString()}
-
+            <td>
+                ${item.entry || ""}
             </td>
 
-            <td style="text-align:center">
+            <td>
+                ${item.factory || ""}
+            </td>
 
+            <td>
+                ${item.model || ""}
+            </td>
+
+            <td>
+                ${item.description || ""}
+            </td>
+
+            <td style="text-align:center;">
+                ${formatQuantity(item.qty)}
+            </td>
+
+            <td style="text-align:center;">
                 ${item.etd || ""}
-
             </td>
 
-            <td style="text-align:center">
-
+            <td style="text-align:center;">
                 ${item.eta || ""}
-
             </td>
 
-            <td style="text-align:center">
-
+            <td style="text-align:center;">
                 ${item.pol || ""}
-
             </td>
 
-            <td style="text-align:center">
-
+            <td style="text-align:center;">
                 ${item.pod || ""}
-
             </td>
 
         `;
+
 
         tbody.appendChild(tr);
 
     });
 
 }
-// =========================================
-// Dashboard Sorting
-// =========================================
+
+
+// =========================================================
+// SORT BY ENTRY
+// =========================================================
 
 function sortByEntry(){
 
     filteredShipments.sort((a,b)=>{
 
+        const result =
+            String(a.entry || "")
+            .localeCompare(
+                String(b.entry || ""),
+                undefined,
+                {
+                    numeric:true,
+                    sensitivity:"base"
+                }
+            );
+
+
         return entryAscending
-
-            ? String(a.entry).localeCompare(String(b.entry))
-
-            : String(b.entry).localeCompare(String(a.entry));
+            ? result
+            : -result;
 
     });
 
-    entryAscending = !entryAscending;
 
-    renderTable(filteredShipments);
+    entryAscending =
+        !entryAscending;
+
+
+    renderTable(
+        filteredShipments
+    );
 
 }
+
+
+// =========================================================
+// SORT BY QTY
+// =========================================================
 
 function sortByQty(){
 
     filteredShipments.sort((a,b)=>{
 
+        const aValue =
+            parseFloat(
+                String(a.qty || "")
+                .replace(/[^\d.-]/g,"")
+            ) || 0;
+
+
+        const bValue =
+            parseFloat(
+                String(b.qty || "")
+                .replace(/[^\d.-]/g,"")
+            ) || 0;
+
+
         return qtyAscending
-
-            ? Number(a.qty)-Number(b.qty)
-
-            : Number(b.qty)-Number(a.qty);
+            ? aValue - bValue
+            : bValue - aValue;
 
     });
 
-    qtyAscending = !qtyAscending;
 
-    renderTable(filteredShipments);
+    qtyAscending =
+        !qtyAscending;
+
+
+    renderTable(
+        filteredShipments
+    );
 
 }
+
+
+// =========================================================
+// SORT BY ETA
+// =========================================================
 
 function sortByETA(){
 
     filteredShipments.sort((a,b)=>{
 
+        const aDate =
+            new Date(a.eta);
+
+        const bDate =
+            new Date(b.eta);
+
+
         return etaAscending
-
-            ? new Date(a.eta)-new Date(b.eta)
-
-            : new Date(b.eta)-new Date(a.eta);
+            ? aDate - bDate
+            : bDate - aDate;
 
     });
 
-    etaAscending = !etaAscending;
 
-    renderTable(filteredShipments);
+    etaAscending =
+        !etaAscending;
+
+
+    renderTable(
+        filteredShipments
+    );
 
 }
-// =========================================
-// Dashboard Events
-// =========================================
+// =========================================================
+// DASHBOARD CHARTS
+// =========================================================
 
-document.getElementById("searchInput")
-.addEventListener("input",applyFilters);
 
-document.getElementById("departmentFilter")
-.addEventListener("change",applyFilters);
-
-document.getElementById("polFilter")
-.addEventListener("change",applyFilters);
-
-document.getElementById("podFilter")
-.addEventListener("change",applyFilters);
-
-document.getElementById("factoryFilter")
-.addEventListener("change",applyFilters);
-
-document.getElementById("statusFilter")
-.addEventListener("change",applyFilters);
-
-document.getElementById("entryHeader")
-.addEventListener("click",sortByEntry);
-
-document.getElementById("qtyHeader")
-.addEventListener("click",sortByQty);
-
-document.getElementById("etaHeader")
-.addEventListener("click",sortByETA);
-// =========================================
-// Dashboard Charts
-// =========================================
+// =========================================================
+// CONTAINERS BY ETA MONTH
+// =========================================================
 
 function drawMonthChart(data){
 
     const months = [
-        "Jan","Feb","Mar","Apr","May","Jun",
-        "Jul","Aug","Sep","Oct","Nov","Dec"
+
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+
     ];
 
-    const shipments = Array(12).fill(0);
-    const containersCount = Array(12).fill(0);
+
+    const shipmentsCount =
+        Array(12).fill(0);
+
+
+    const containersCount =
+        Array(12).fill(0);
+
 
     data.forEach(item=>{
 
-        if(!item.eta) return;
+        if(!item.eta){
 
-        const d = new Date(item.eta);
+            return;
 
-        if(isNaN(d)) return;
+        }
 
-        const m = d.getMonth();
 
-        shipments[m]++;
+        const date =
+            new Date(item.eta);
 
-        containersCount[m] += getContainerCount(item.hq);
+
+        if(isNaN(date)){
+
+            return;
+
+        }
+
+
+        const month =
+            date.getMonth();
+
+
+        shipmentsCount[month]++;
+
+
+        containersCount[month] +=
+            getContainerCount(item.hq);
 
     });
+
 
     if(monthChart){
 
@@ -638,17 +1015,22 @@ function drawMonthChart(data){
 
     }
 
+
     monthChart = new Chart(
 
-        document.getElementById("monthChart"),
+        document.getElementById(
+            "monthChart"
+        ),
 
         {
 
             type:"bar",
 
+
             data:{
 
                 labels:months,
+
 
                 datasets:[{
 
@@ -656,13 +1038,20 @@ function drawMonthChart(data){
 
                     data:containersCount,
 
-                    backgroundColor:"#2563eb",
+                    backgroundColor:
+                        "#2563EB",
 
-                    borderRadius:8
+                    hoverBackgroundColor:
+                        "#1D4ED8",
+
+                    borderRadius:8,
+
+                    borderSkipped:false
 
                 }]
 
             },
+
 
             options:{
 
@@ -670,27 +1059,95 @@ function drawMonthChart(data){
 
                 maintainAspectRatio:false,
 
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+
                 plugins:{
+
+                    legend:{
+
+                        display:false
+
+                    },
+
 
                     tooltip:{
 
                         callbacks:{
 
+                            title:function(context){
+
+                                return context[0]
+                                    .label;
+
+                            },
+
+
+                            label:function(context){
+
+                                return (
+
+                                    " Containers: " +
+
+                                    containersCount[
+                                        context.dataIndex
+                                    ]
+
+                                );
+
+                            },
+
+
                             afterLabel:function(context){
 
-                                return "Shipments : " +
+                                return (
 
-                                shipments[context.dataIndex];
+                                    " Shipments: " +
+
+                                    shipmentsCount[
+                                        context.dataIndex
+                                    ]
+
+                                );
 
                             }
 
                         }
 
+                    }
+
+                },
+
+
+                scales:{
+
+                    x:{
+
+                        grid:{
+
+                            display:false
+
+                        }
+
                     },
 
-                    legend:{
 
-                        display:false
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
 
                     }
 
@@ -704,21 +1161,25 @@ function drawMonthChart(data){
 
 }
 
-// =========================================
-// Factory Chart
-// =========================================
+
+// =========================================================
+// TOP 3 FACTORIES
+// =========================================================
 
 function drawFactoryChart(data){
 
     const factories = {};
 
+
     data.forEach(item=>{
 
-        const name = item.factory || "Unknown";
+        const factory =
+            item.factory || "Unknown";
 
-        if(!factories[name]){
 
-            factories[name]={
+        if(!factories[factory]){
+
+            factories[factory] = {
 
                 shipments:0,
 
@@ -728,34 +1189,47 @@ function drawFactoryChart(data){
 
         }
 
-        factories[name].shipments++;
 
-        factories[name].containers +=
+        factories[factory].shipments++;
 
+
+        factories[factory].containers +=
             getContainerCount(item.hq);
 
     });
 
-    const top =
+
+    const topFactories =
 
         Object.entries(factories)
 
         .sort((a,b)=>
 
-            b[1].shipments-a[1].shipments
+            b[1].shipments -
+            a[1].shipments
 
         )
 
         .slice(0,3);
 
-    const labels =
-        top.map(x=>x[0]);
 
-    const values =
-        top.map(x=>x[1].shipments);
+    const labels =
+        topFactories.map(
+            item=>item[0]
+        );
+
+
+    const shipmentValues =
+        topFactories.map(
+            item=>item[1].shipments
+        );
+
 
     const containerValues =
-        top.map(x=>x[1].containers);
+        topFactories.map(
+            item=>item[1].containers
+        );
+
 
     if(factoryChart){
 
@@ -763,31 +1237,43 @@ function drawFactoryChart(data){
 
     }
 
+
     factoryChart = new Chart(
 
-        document.getElementById("factoryChart"),
+        document.getElementById(
+            "factoryChart"
+        ),
 
         {
 
             type:"bar",
 
+
             data:{
 
-                labels,
+                labels:labels,
+
 
                 datasets:[{
 
                     label:"Shipments",
 
-                    data:values,
+                    data:shipmentValues,
 
-                    backgroundColor:"#22c55e",
+                    backgroundColor:
+                        "#10B981",
 
-                    borderRadius:8
+                    hoverBackgroundColor:
+                        "#059669",
+
+                    borderRadius:8,
+
+                    borderSkipped:false
 
                 }]
 
             },
+
 
             options:{
 
@@ -797,27 +1283,78 @@ function drawFactoryChart(data){
 
                 maintainAspectRatio:false,
 
+
                 plugins:{
+
+                    legend:{
+
+                        display:false
+
+                    },
+
 
                     tooltip:{
 
                         callbacks:{
 
+                            label:function(context){
+
+                                return (
+
+                                    " Shipments: " +
+
+                                    shipmentValues[
+                                        context.dataIndex
+                                    ]
+
+                                );
+
+                            },
+
+
                             afterLabel:function(context){
 
-                                return "Containers : "+
+                                return (
 
-                                containerValues[context.dataIndex];
+                                    " Containers: " +
+
+                                    containerValues[
+                                        context.dataIndex
+                                    ]
+
+                                );
 
                             }
 
                         }
 
+                    }
+
+                },
+
+
+                scales:{
+
+                    x:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
                     },
 
-                    legend:{
 
-                        display:false
+                    y:{
+
+                        grid:{
+
+                            display:false
+
+                        }
 
                     }
 
@@ -830,315 +1367,602 @@ function drawFactoryChart(data){
     );
 
 }
-// =========================================
-// Container KPIs
-// =========================================
+
+
+// =========================================================
+// DASHBOARD EVENTS
+// =========================================================
+
+document
+.getElementById("searchInput")
+.addEventListener(
+    "input",
+    applyFilters
+);
+
+
+document
+.getElementById("departmentFilter")
+.addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document
+.getElementById("polFilter")
+.addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document
+.getElementById("podFilter")
+.addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document
+.getElementById("factoryFilter")
+.addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document
+.getElementById("statusFilter")
+.addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document
+.getElementById("entryHeader")
+.addEventListener(
+    "click",
+    sortByEntry
+);
+
+
+document
+.getElementById("qtyHeader")
+.addEventListener(
+    "click",
+    sortByQty
+);
+
+
+document
+.getElementById("etaHeader")
+.addEventListener(
+    "click",
+    sortByETA
+);
+// =========================================================
+// CONTAINERS STATUS
+// =========================================================
+
+
+// =========================================================
+// CONTAINER KPIs
+// =========================================================
 
 function updateContainerKPIs(data){
 
     // Total Containers
 
-    document.getElementById("containerTotal").textContent =
+    document.getElementById(
+        "containerTotal"
+    ).textContent =
         data.length.toLocaleString();
 
-    // Transit Locations
-
-    const transitLocations = new Set();
-
-    data.forEach(item=>{
-
-        const current =
-
-            item.transit3 ||
-
-            item.transit2 ||
-
-            item.transit1;
-
-        if(current){
-
-            transitLocations.add(current);
-
-        }
-
-    });
-
-    document.getElementById("transitLocations").textContent =
-        transitLocations.size.toLocaleString();
 
     // Destination Ports
 
-    const destinationPorts = new Set();
+    const destinations = new Set();
 
     data.forEach(item=>{
 
-        if(item.pod){
+        const pod =
+            String(item.pod || "").trim();
 
-            destinationPorts.add(item.pod);
+        if(pod){
+
+            destinations.add(pod);
 
         }
 
     });
 
-    document.getElementById("destinationPorts").textContent =
-        destinationPorts.size.toLocaleString();
+
+    document.getElementById(
+        "destinationPorts"
+    ).textContent =
+        destinations.size.toLocaleString();
+
 
     // Arriving This Month
 
-    const today = new Date();
+    const today =
+        new Date();
 
-    const month = today.getMonth();
+    const currentMonth =
+        today.getMonth();
 
-    const year = today.getFullYear();
+    const currentYear =
+        today.getFullYear();
 
-    const arriving = data.filter(item=>{
 
-        if(!item.eta) return false;
+    const arrivingThisMonth =
+        data.filter(item=>{
 
-        const d = new Date(item.eta);
+            if(!item.eta){
 
-        return d.getMonth() === month &&
-               d.getFullYear() === year;
+                return false;
 
-    });
+            }
 
-    document.getElementById("arrivingMonth").textContent =
-        arriving.length.toLocaleString();
+
+            const date =
+                new Date(item.eta);
+
+
+            if(isNaN(date)){
+
+                return false;
+
+            }
+
+
+            return (
+
+                date.getMonth() ===
+                currentMonth
+
+                &&
+
+                date.getFullYear() ===
+                currentYear
+
+            );
+
+        });
+
+
+    document.getElementById(
+        "arrivingMonth"
+    ).textContent =
+        arrivingThisMonth.length.toLocaleString();
 
 }
 
-// =========================================
-// Fill Container Filters
-// =========================================
+
+// =========================================================
+// CONTAINER FILTER OPTIONS
+// =========================================================
 
 function fillContainerFilters(data){
 
-    const transit =
-        document.getElementById("transitFilter");
+    const transitSelect =
+        document.getElementById(
+            "transitFilter"
+        );
 
-    const pod =
-        document.getElementById("podContainerFilter");
 
-    transit.innerHTML =
-        '<option value="">All Transit</option>';
+    const podSelect =
+        document.getElementById(
+            "podContainerFilter"
+        );
 
-    pod.innerHTML =
-        '<option value="">All Destination Ports</option>';
 
+    // -----------------------------------------------------
     // Transit
+    // -----------------------------------------------------
 
-    const transitList =
+    transitSelect.innerHTML = `
 
-        [...new Set(
+        <option value="">
+            All Transit
+        </option>
 
-            data.map(item=>
+    `;
 
-                item.transit3 ||
 
-                item.transit2 ||
+    const transitValues = new Set();
 
-                item.transit1
-
-            )
-
-            .filter(Boolean)
-
-        )]
-
-        .sort();
-
-    transitList.forEach(item=>{
-
-        transit.innerHTML +=
-
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-    // POD
-
-    const podList =
-
-        [...new Set(
-
-            data.map(item=>item.pod)
-
-            .filter(Boolean)
-
-        )]
-
-        .sort();
-
-    podList.forEach(item=>{
-
-        pod.innerHTML +=
-
-        `<option value="${item}">${item}</option>`;
-
-    });
-
-}
-// =========================================
-// Render Containers
-// =========================================
-
-function renderContainers(data){
-
-    const tbody =
-        document.querySelector("#containerTable tbody");
-
-    tbody.innerHTML = "";
 
     data.forEach(item=>{
 
-        // =========================
-        // Route
-        // =========================
-
-        const route = [];
-
         if(item.transit1){
 
-            route.push(
-                `<span class="route-badge">${item.transit1}</span>`
+            transitValues.add(
+                String(item.transit1).trim()
             );
 
         }
 
         if(item.transit2){
 
-            route.push(
-                `<span class="route-arrow">➜</span>
-                 <span class="route-badge">${item.transit2}</span>`
+            transitValues.add(
+                String(item.transit2).trim()
             );
 
         }
 
         if(item.transit3){
 
-            route.push(
-                `<span class="route-arrow">➜</span>
-                 <span class="route-badge">${item.transit3}</span>`
+            transitValues.add(
+                String(item.transit3).trim()
             );
 
         }
 
-        // =========================
-        // Current Transit
-        // =========================
+    });
 
-        let currentTransit = "";
-        let currentClass = "";
 
-        if(item.transit3){
+    [...transitValues]
 
-            currentTransit = item.transit3;
-            currentClass = "transit3";
+        .filter(Boolean)
 
-        }
-        else if(item.transit2){
+        .sort()
 
-            currentTransit = item.transit2;
-            currentClass = "transit2";
+        .forEach(value=>{
 
-        }
-        else{
+            transitSelect.innerHTML += `
 
-            currentTransit = item.transit1 || "";
-            currentClass = "transit1";
+                <option value="${value}">
+                    ${value}
+                </option>
 
-        }
+            `;
 
-        // =========================
-        // Progress
-        // =========================
+        });
 
-        const stops = [
 
-            item.transit1,
-            item.transit2,
+    // -----------------------------------------------------
+    // Destination
+    // -----------------------------------------------------
+
+    podSelect.innerHTML = `
+
+        <option value="">
+            All Destinations
+        </option>
+
+    `;
+
+
+    const destinations = [
+
+        ...new Set(
+
+            data
+
+            .map(item=>
+                String(item.pod || "").trim()
+            )
+
+            .filter(Boolean)
+
+        )
+
+    ].sort();
+
+
+    destinations.forEach(value=>{
+
+        podSelect.innerHTML += `
+
+            <option value="${value}">
+                ${value}
+            </option>
+
+        `;
+
+    });
+
+}
+
+
+// =========================================================
+// CURRENT TRANSIT
+// =========================================================
+
+function getCurrentTransit(item){
+
+    if(
+        String(item.transit3 || "").trim()
+    ){
+
+        return String(
             item.transit3
+        ).trim();
 
-        ].filter(Boolean);
+    }
 
-        let completed = 1;
 
-        if(item.transit3){
+    if(
+        String(item.transit2 || "").trim()
+    ){
 
-            completed = 3;
+        return String(
+            item.transit2
+        ).trim();
 
-        }
-        else if(item.transit2){
+    }
 
-            completed = 2;
 
-        }
+    if(
+        String(item.transit1 || "").trim()
+    ){
 
-        const percent =
-            stops.length
-            ? Math.round((completed / stops.length) * 100)
-            : 0;
+        return String(
+            item.transit1
+        ).trim();
 
-        // =========================
-        // Row
-        // =========================
+    }
+
+
+    return "";
+
+}
+
+
+// =========================================================
+// BUILD ROUTE
+// =========================================================
+
+function buildRoute(item){
+
+    const route = [];
+
+
+    // Transit 1
+    if(String(item.transit1 || "").trim()){
+
+        route.push(
+            String(item.transit1).trim()
+        );
+
+    }
+
+
+    // Transit 2
+    if(String(item.transit2 || "").trim()){
+
+        route.push(
+            String(item.transit2).trim()
+        );
+
+    }
+
+
+    // Transit 3
+    if(String(item.transit3 || "").trim()){
+
+        route.push(
+            String(item.transit3).trim()
+        );
+
+    }
+
+
+    // Transit 4
+    if(String(item.transit4 || "").trim()){
+
+        route.push(
+            String(item.transit4).trim()
+        );
+
+    }
+
+
+    // Transit 5
+    if(String(item.transit5 || "").trim()){
+
+        route.push(
+            String(item.transit5).trim()
+        );
+
+    }
+
+
+    // Destination
+    if(String(item.pod || "").trim()){
+
+        route.push(
+            String(item.pod).trim()
+        );
+
+    }
+
+
+    return route;
+
+}
+
+
+// =========================================================
+// RENDER CONTAINERS TABLE
+// =========================================================
+
+function renderContainers(data){
+
+    const tbody =
+        document.querySelector(
+            "#containerTable tbody"
+        );
+
+    tbody.innerHTML = "";
+
+
+    data.forEach(item => {
+
+        // =================================================
+        // MODEL
+        // =================================================
+        // "&" تعتبر فاصل بين الموديلات
+        // وكل موديل يظهر في سطر مستقل
+        // =================================================
+
+         const models = String(
+         item.model || ""
+         )
+         .replace(/&/g, " ")
+         .split(/\s+/)
+         .map(value => value.trim())
+         .filter(Boolean);
+
+
+         const modelHTML = models.length
+            ? models.map(model => `
+                <div class="multi-line-value">
+                    ${model}
+                </div>
+            `).join("")
+            : "";
+
+
+        // =================================================
+        // QTY
+        // =================================================
+        // نفس فكرة Model:
+        // كل قيمة مفصولة بمسافة تظهر في سطر مستقل
+        //
+        // مثال:
+        // 800 400
+        //
+        // تصبح:
+        // 800
+        // 400
+        // =================================================
+
+        const quantities = String(
+            item.qty || ""
+        )
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+
+        const qtyHTML = quantities.length
+            ? quantities.map(qty => `
+                <div class="multi-line-value qty-value">
+                    ${qty}
+                </div>
+            `).join("")
+            : "";
+
+
+        // =================================================
+        // ROUTE
+        // =================================================
+
+        const route =
+            buildRoute(item);
+
+
+        const routeHTML = route.length
+            ? route.map((location, index) => {
+
+                const badge = `
+                    <span class="route-badge">
+                        ${location}
+                    </span>
+                `;
+
+
+                if(index === 0){
+
+                    return badge;
+
+                }
+
+
+                return `
+                    <span class="route-arrow">
+                        →
+                    </span>
+
+                    ${badge}
+                `;
+
+            }).join("")
+            : "";
+
+
+        // =================================================
+        // ROW
+        // =================================================
 
         const tr =
             document.createElement("tr");
 
+
         tr.innerHTML = `
 
-            <td>${item.entry || ""}</td>
+            <!-- Entry الحقيقي -->
 
-            <td>${item.sn || ""}</td>
+            <td>
+                ${item.entry || ""}
+            </td>
 
-            <td>${item.container || ""}</td>
 
-            <td>${item.model || ""}</td>
+            <!-- S/N -->
 
-            <td>${Number(item.qty || 0).toLocaleString()}</td>
+            <td>
+                ${item.sn || ""}
+            </td>
+
+
+            <!-- Container -->
+
+            <td>
+                ${item.container || ""}
+            </td>
+
+
+            <!-- Model -->
+
+            <td class="multi-line-cell">
+                ${modelHTML}
+            </td>
+
+
+            <!-- QTY -->
+
+            <td class="multi-line-cell qty-cell">
+                ${qtyHTML}
+            </td>
+
+
+            <!-- Route -->
 
             <td class="route-cell">
-
-                ${route.join("")}
-
+                ${routeHTML}
             </td>
+
+
+            <!-- Destination -->
 
             <td>
-
-                <div class="progress-bar">
-
-                    <div
-                        class="progress-fill"
-                        style="width:${percent}%">
-
-                    </div>
-
-                </div>
-
-                <div class="progress-text">
-
-                    ${percent}%
-
-                </div>
-
+                ${item.pod || ""}
             </td>
+
+
+            <!-- ETA -->
 
             <td>
-
-                <span class="current-transit ${currentClass}">
-
-                    ${currentTransit}
-
-                </span>
-
+                ${item.eta || ""}
             </td>
-
-            <td>${item.pod || ""}</td>
-
-            <td>${item.eta || ""}</td>
 
         `;
+
 
         tbody.appendChild(tr);
 
@@ -1146,234 +1970,250 @@ function renderContainers(data){
 
 }
 
-// =========================================
-// Apply Container Filters
-// =========================================
+
+// =========================================================
+// APPLY CONTAINER FILTERS
+// =========================================================
 
 function applyContainerFilters(){
 
-    let data = [...containers];
+    let data =
+        [...containers];
+
 
     const search =
-        document.getElementById("containerSearch")
-        .value
+        document.getElementById(
+            "containerSearch"
+        ).value
         .toLowerCase()
         .trim();
 
+
     const transit =
-        document.getElementById("transitFilter")
-        .value;
+        document.getElementById(
+            "transitFilter"
+        ).value;
+
 
     const pod =
-        document.getElementById("podContainerFilter")
-        .value;
+        document.getElementById(
+            "podContainerFilter"
+        ).value;
+
 
     const eta =
-        document.getElementById("etaContainerFilter")
-        .value;
+        document.getElementById(
+            "etaContainerFilter"
+        ).value;
 
+
+    // -----------------------------------------------------
     // Search
+    // -----------------------------------------------------
 
     if(search){
 
-        data = data.filter(item=>
+        data = data.filter(item=>{
 
-            String(item.entry || "").toLowerCase().includes(search) ||
+            return (
 
-            String(item.sn || "").toLowerCase().includes(search) ||
+                String(item.entry || "")
+                    .toLowerCase()
+                    .includes(search)
 
-            String(item.container || "").toLowerCase().includes(search) ||
+                ||
 
-            String(item.model || "").toLowerCase().includes(search)
+                String(item.sn || "")
+                    .toLowerCase()
+                    .includes(search)
 
-        );
+                ||
+
+                String(item.container || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.model || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(item.qty || "")
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        });
 
     }
 
+
+    // -----------------------------------------------------
     // Transit
+    // -----------------------------------------------------
 
     if(transit){
 
         data = data.filter(item=>{
 
-            const current =
+            const values = [
 
-                item.transit3 ||
+                item.transit1,
 
-                item.transit2 ||
+                item.transit2,
 
-                item.transit1;
+                item.transit3
 
-            return current === transit;
+            ]
+
+            .map(value=>
+                String(value || "").trim()
+            );
+
+
+            return values.includes(
+                transit
+            );
 
         });
 
     }
 
-    // POD
+
+    // -----------------------------------------------------
+    // Destination
+    // -----------------------------------------------------
 
     if(pod){
 
         data = data.filter(item=>
 
-            item.pod === pod
+            String(item.pod || "").trim() ===
+            String(pod).trim()
 
         );
 
     }
 
+
+    // -----------------------------------------------------
     // ETA
+    // -----------------------------------------------------
 
     if(eta){
 
         data = data.filter(item=>{
 
-            if(!item.eta) return false;
+            if(!item.eta){
 
-            const d = new Date(item.eta);
+                return false;
 
-            if(isNaN(d)) return false;
+            }
 
-            const yyyy = d.getFullYear();
 
-            const mm = String(d.getMonth()+1).padStart(2,"0");
+            const date =
+                new Date(item.eta);
 
-            const dd = String(d.getDate()).padStart(2,"0");
 
-            return `${yyyy}-${mm}-${dd}` === eta;
+            if(isNaN(date)){
+
+                return false;
+
+            }
+
+
+            const year =
+                date.getFullYear();
+
+
+            const month =
+                String(
+                    date.getMonth()+1
+                ).padStart(2,"0");
+
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(2,"0");
+
+
+            return (
+
+                `${year}-${month}-${day}` ===
+                eta
+
+            );
 
         });
 
     }
 
-    filteredContainers = data;
 
-    renderContainers(filteredContainers);
+    filteredContainers =
+        data;
 
-    updateContainerKPIs(filteredContainers);
 
-    drawTransitChart(filteredContainers);
+    renderContainers(
+        filteredContainers
+    );
 
-    drawDestinationChart(filteredContainers);
 
-}
-// =========================================
-// Containers by Current Transit
-// =========================================
+    updateContainerKPIs(
+        filteredContainers
+    );
 
-function drawTransitChart(data){
 
-    const transit = {};
-
-    data.forEach(item=>{
-
-        const current =
-
-            item.transit3 ||
-
-            item.transit2 ||
-
-            item.transit1;
-
-        if(!current) return;
-
-        transit[current] =
-
-            (transit[current] || 0) + 1;
-
-    });
-
-    const labels =
-        Object.keys(transit);
-
-    const values =
-        Object.values(transit);
-
-    if(warehouseChart){
-
-        warehouseChart.destroy();
-
-    }
-
-    warehouseChart = new Chart(
-
-        document.getElementById("warehouseChart"),
-
-        {
-
-            type:"bar",
-
-            data:{
-
-                labels,
-
-                datasets:[{
-
-                    label:"Containers",
-
-                    data:values,
-
-                    backgroundColor:"#2563eb",
-
-                    borderRadius:8
-
-                }]
-
-            },
-
-            options:{
-
-                responsive:true,
-
-                maintainAspectRatio:false,
-
-                plugins:{
-
-                    legend:{
-                        display:false
-                    }
-
-                },
-
-                scales:{
-
-                    y:{
-                        beginAtZero:true
-                    }
-
-                }
-
-            }
-
-        }
-
+    drawDestinationChart(
+        filteredContainers
     );
 
 }
-
-// =========================================
-// Containers by Destination Port
-// =========================================
+// =========================================================
+// CONTAINERS STATUS CHART
+// =========================================================
 
 function drawDestinationChart(data){
 
-    const ports = {};
+    const destinations = {};
+
 
     data.forEach(item=>{
 
-        if(!item.pod) return;
+        const destination =
+            String(item.pod || "").trim();
 
-        ports[item.pod] =
 
-            (ports[item.pod] || 0) + 1;
+        if(!destination){
+
+            return;
+
+        }
+
+
+        if(!destinations[destination]){
+
+            destinations[destination] = 0;
+
+        }
+
+
+        destinations[destination]++;
 
     });
 
+
     const labels =
-        Object.keys(ports);
+        Object.keys(destinations);
+
 
     const values =
-        Object.values(ports);
+        Object.values(destinations);
+
 
     if(warehouseStatusChart){
 
@@ -1381,122 +2221,332 @@ function drawDestinationChart(data){
 
     }
 
-    warehouseStatusChart = new Chart(
 
-        document.getElementById("warehouseStatusChart"),
+    const canvas =
+        document.getElementById(
+            "warehouseStatusChart"
+        );
 
-        {
 
-            type:"doughnut",
+    if(!canvas){
 
-            data:{
+        return;
 
-                labels,
+    }
 
-                datasets:[{
 
-                    data:values,
+    warehouseStatusChart =
+        new Chart(
 
-                    backgroundColor:[
+            canvas,
 
-                        "#2563eb",
-                        "#22c55e",
-                        "#f59e0b",
-                        "#ef4444",
-                        "#8b5cf6",
-                        "#06b6d4",
-                        "#14b8a6",
-                        "#64748b"
+            {
 
-                    ]
+                type:"doughnut",
 
-                }]
 
-            },
+                data:{
 
-            options:{
+                    labels:labels,
 
-                responsive:true,
 
-                maintainAspectRatio:false,
+                    datasets:[{
 
-                plugins:{
+                        data:values,
 
-                    legend:{
-                        position:"bottom"
+                        backgroundColor:[
+
+                            "#2563EB",
+
+                            "#10B981",
+
+                            "#F59E0B",
+
+                            "#8B5CF6",
+
+                            "#06B6D4",
+
+                            "#EF4444",
+
+                            "#64748B",
+
+                            "#14B8A6"
+
+                        ],
+
+                        borderWidth:2,
+
+                        borderColor:"#FFFFFF"
+
+                    }]
+
+                },
+
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+
+                    plugins:{
+
+                        legend:{
+
+                            position:"bottom",
+
+                            labels:{
+
+                                padding:18,
+
+                                usePointStyle:true,
+
+                                pointStyle:"circle"
+
+                            }
+
+                        },
+
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:function(context){
+
+                                    const total =
+                                        values.reduce(
+                                            (sum,value)=>
+                                                sum + value,
+                                            0
+                                        );
+
+
+                                    const value =
+                                        context.raw;
+
+
+                                    const percentage =
+                                        total
+                                        ? (
+                                            value /
+                                            total *
+                                            100
+                                        ).toFixed(1)
+                                        : 0;
+
+
+                                    return (
+
+                                        " " +
+                                        context.label +
+                                        ": " +
+                                        value +
+                                        " (" +
+                                        percentage +
+                                        "%)"
+
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
                     }
 
                 }
 
             }
 
+        );
+
+}
+
+
+// =========================================================
+// CONTAINER SEARCH EVENT
+// =========================================================
+
+document
+.getElementById("containerSearch")
+.addEventListener(
+    "input",
+    applyContainerFilters
+);
+
+
+// =========================================================
+// TRANSIT FILTER EVENT
+// =========================================================
+
+document
+.getElementById("transitFilter")
+.addEventListener(
+    "change",
+    applyContainerFilters
+);
+
+
+// =========================================================
+// DESTINATION FILTER EVENT
+// =========================================================
+
+document
+.getElementById("podContainerFilter")
+.addEventListener(
+    "change",
+    applyContainerFilters
+);
+
+
+// =========================================================
+// ETA FILTER EVENT
+// =========================================================
+
+document
+.getElementById("etaContainerFilter")
+.addEventListener(
+    "change",
+    applyContainerFilters
+);
+
+
+// =========================================================
+// NAVIGATION
+// =========================================================
+
+const dashboardBtn =
+    document.getElementById(
+        "dashboardBtn"
+    );
+
+
+const containersBtn =
+    document.getElementById(
+        "containersBtn"
+    );
+
+
+const dashboardPage =
+    document.getElementById(
+        "dashboardPage"
+    );
+
+
+const containersPage =
+    document.getElementById(
+        "containersPage"
+    );
+
+
+// =========================================================
+// DASHBOARD BUTTON
+// =========================================================
+
+dashboardBtn.addEventListener(
+    "click",
+    ()=>{
+
+        dashboardBtn.classList.add(
+            "active"
+        );
+
+
+        containersBtn.classList.remove(
+            "active"
+        );
+
+
+        dashboardPage.style.display =
+            "block";
+
+
+        containersPage.style.display =
+            "none";
+
+    }
+);
+
+
+// =========================================================
+// CONTAINERS STATUS BUTTON
+// =========================================================
+
+containersBtn.addEventListener(
+    "click",
+    ()=>{
+
+        containersBtn.classList.add(
+            "active"
+        );
+
+
+        dashboardBtn.classList.remove(
+            "active"
+        );
+
+
+        dashboardPage.style.display =
+            "none";
+
+
+        containersPage.style.display =
+            "block";
+
+
+        if(!containersLoaded){
+
+            loadContainers();
+
+            containersLoaded = true;
+
         }
 
+    }
+);
+// =========================================================
+// FINAL INITIALIZATION
+// =========================================================
+
+// Make sure Dashboard is visible on first load
+
+dashboardPage.style.display = "block";
+
+containersPage.style.display = "none";
+
+
+// =========================================================
+// MENU BUTTON
+// =========================================================
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+if(menuBtn){
+
+    menuBtn.addEventListener(
+        "click",
+        ()=>{
+
+            document
+                .querySelector(".navbar")
+                .classList.toggle("menu-open");
+
+        }
     );
 
 }
 
-// =========================================
-// Container Events
-// =========================================
 
-document.getElementById("containerSearch")
-.addEventListener("input",applyContainerFilters);
+// =========================================================
+// INITIAL STATE
+// =========================================================
 
-document.getElementById("transitFilter")
-.addEventListener("change",applyContainerFilters);
+// Dashboard is loaded immediately.
+// Containers are loaded only when the
+// Containers Status page is opened.
 
-document.getElementById("podContainerFilter")
-.addEventListener("change",applyContainerFilters);
-
-document.getElementById("etaContainerFilter")
-.addEventListener("change",applyContainerFilters);
-// =========================================
-// Navigation
-// =========================================
-
-let containersLoaded = false;
-
-const dashboardBtn =
-    document.getElementById("dashboardBtn");
-
-const containersBtn =
-    document.getElementById("containersBtn");
-
-const dashboardPage =
-    document.getElementById("dashboardPage");
-
-const containersPage =
-    document.getElementById("containersPage");
-
-// Dashboard
-
-dashboardBtn.addEventListener("click",()=>{
-
-    dashboardBtn.classList.add("active");
-    containersBtn.classList.remove("active");
-
-    dashboardPage.style.display = "block";
-    containersPage.style.display = "none";
-
-});
-
-// Containers
-
-containersBtn.addEventListener("click",()=>{
-
-    containersBtn.classList.add("active");
-    dashboardBtn.classList.remove("active");
-
-    dashboardPage.style.display = "none";
-    containersPage.style.display = "block";
-
-    if(!containersLoaded){
-
-        loadContainers();
-
-        containersLoaded = true;
-
-    }
-
-});
+containersLoaded = false;
