@@ -1,33 +1,139 @@
-/* =========================================
+/* =========================================================
+   LOGISTICS CONTROL TOWER
+   Premium UI v2.0
+========================================================= */
+
+/* =========================
+   Google Fonts
+========================= */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* =========================
    Reset
-========================================= */
+========================= */
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Arial,sans-serif;
 }
+
+/* =========================
+   Root Colors
+========================= */
+
+:root{
+
+    --navy:#0F172A;
+    --blue:#2563EB;
+    --emerald:#10B981;
+    --amber:#F59E0B;
+    --danger:#EF4444;
+
+    --bg:#F4F7FB;
+    --card:#FFFFFF;
+
+    --text:#0F172A;
+    --sub:#64748B;
+
+    --border:#E5E7EB;
+
+    --radius:18px;
+
+    --shadow:
+        0 10px 35px rgba(15,23,42,.08);
+
+}
+
+/* =========================
+   Body
+========================= */
 
 body{
 
-    background:#f5f7fb;
+    background:var(--bg);
 
-    color:#1e293b;
+    color:var(--text);
+
+    font-family:
+        "IBM Plex Sans Arabic",
+        "Inter",
+        sans-serif;
+
+    -webkit-font-smoothing:antialiased;
+
+    overflow-x:hidden;
 
 }
 
-/* =========================================
+/* =========================
+   Links
+========================= */
+
+a{
+
+    color:inherit;
+
+    text-decoration:none;
+
+}
+
+/* =========================
+   Images
+========================= */
+
+img{
+
+    display:block;
+
+    max-width:100%;
+
+}
+
+/* =========================
+   Main Layout
+========================= */
+
+.container{
+
+    width:min(1600px,95%);
+
+    margin:auto;
+
+    padding:32px 0 50px;
+
+}
+
+/* =========================
+   Titles
+========================= */
+
+h2{
+
+    font-size:28px;
+
+    font-weight:700;
+
+    color:var(--navy);
+
+    margin-bottom:22px;
+
+}
+/* =========================
    Header
-========================================= */
+========================= */
 
 .header{
 
-    background:#0f172a;
+    height:90px;
 
-    color:#fff;
-
-    height:88px;
+    background:
+    linear-gradient(
+        135deg,
+        #0F172A 0%,
+        #1E3A8A 100%
+    );
 
     display:flex;
 
@@ -35,16 +141,25 @@ body{
 
     justify-content:space-between;
 
-    padding:0 28px;
+    padding:0 35px;
 
-    box-shadow:0 4px 18px rgba(0,0,0,.12);
+    color:#fff;
+
+    box-shadow:
+        0 12px 30px rgba(15,23,42,.20);
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
 
 }
 
 .header-left,
 .header-right{
 
-    width:80px;
+    width:70px;
 
     display:flex;
 
@@ -66,29 +181,37 @@ body{
 
     font-weight:700;
 
+    letter-spacing:.3px;
+
 }
 
 .header-center p{
 
     margin-top:6px;
 
-    color:#cbd5e1;
+    color:#CBD5E1;
 
     font-size:15px;
 
+    font-weight:400;
+
 }
+
+/* =========================
+   Menu Button
+========================= */
 
 .menu-btn{
 
-    width:44px;
+    width:48px;
 
-    height:44px;
+    height:48px;
 
     border:none;
 
-    border-radius:10px;
+    border-radius:14px;
 
-    background:rgba(255,255,255,.08);
+    background:rgba(255,255,255,.10);
 
     color:#fff;
 
@@ -104,43 +227,61 @@ body{
 
     background:rgba(255,255,255,.18);
 
+    transform:translateY(-2px);
+
 }
 
-/* =========================================
+/* =========================
    Navigation
-========================================= */
+========================= */
 
 .navbar{
+
+    background:#fff;
 
     display:flex;
 
     justify-content:center;
 
-    gap:15px;
+    align-items:center;
 
-    padding:15px;
+    gap:14px;
 
-    background:#fff;
+    padding:16px 24px;
 
-    border-bottom:1px solid #e5e7eb;
+    border-bottom:1px solid var(--border);
+
+    position:sticky;
+
+    top:90px;
+
+    z-index:999;
 
 }
 
+/* =========================
+   Navigation Buttons
+========================= */
+
 .nav-btn{
+
+    height:48px;
+
+    padding:0 26px;
 
     border:none;
 
-    background:#f1f5f9;
+    border-radius:14px;
 
-    padding:12px 24px;
+    background:#EEF2FF;
 
-    border-radius:12px;
-
-    cursor:pointer;
+    color:#334155;
 
     font-size:15px;
 
     font-weight:600;
+
+    cursor:pointer;
 
     transition:.25s;
 
@@ -148,7 +289,7 @@ body{
 
 .nav-btn:hover{
 
-    background:#dbeafe;
+    background:#DBEAFE;
 
     transform:translateY(-2px);
 
@@ -156,124 +297,154 @@ body{
 
 .nav-btn.active{
 
-    background:#0f172a;
+    background:var(--navy);
 
     color:#fff;
 
-}
-
-/* =========================================
-   Layout
-========================================= */
-
-.container{
-
-    width:100%;
-
-    max-width:1550px;
-
-    margin:auto;
-
-    padding:28px;
+    box-shadow:
+        0 10px 24px rgba(15,23,42,.22);
 
 }
-
-h2{
-
-    margin-bottom:18px;
-
-    color:#0f172a;
-
-}
-/* =========================================
-   KPI Cards
-========================================= */
+/* =========================
+   KPI Grid
+========================= */
 
 .kpi-grid{
 
     display:grid;
 
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    grid-template-columns:
+        repeat(auto-fit,minmax(280px,1fr));
 
-    gap:20px;
+    gap:22px;
 
-    margin-bottom:30px;
+    margin-bottom:35px;
 
 }
 
+/* =========================
+   KPI Card
+========================= */
+
 .kpi-card{
 
-    background:#fff;
+    position:relative;
 
-    border:1px solid #e5e7eb;
+    overflow:hidden;
 
-    border-radius:18px;
+    background:var(--card);
 
-    padding:22px;
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    padding:24px;
 
     display:flex;
 
     align-items:center;
 
-    gap:18px;
+    gap:20px;
 
-    box-shadow:0 8px 24px rgba(15,23,42,.06);
+    box-shadow:var(--shadow);
 
-    transition:.25s;
+    transition:.30s;
 
 }
 
 .kpi-card:hover{
 
-    transform:translateY(-5px);
+    transform:
+        translateY(-6px);
 
-    box-shadow:0 18px 40px rgba(15,23,42,.12);
+    box-shadow:
+        0 20px 45px rgba(15,23,42,.12);
 
 }
 
+/* Top Border */
+
+.kpi-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    height:5px;
+
+    background:linear-gradient(
+        90deg,
+        var(--blue),
+        var(--emerald)
+    );
+
+}
+
+/* =========================
+   Icon
+========================= */
+
 .kpi-icon{
 
-    width:64px;
+    width:68px;
 
-    height:64px;
+    height:68px;
 
-    border-radius:50%;
+    border-radius:18px;
 
     display:flex;
 
-    justify-content:center;
-
     align-items:center;
+
+    justify-content:center;
 
     font-size:30px;
 
     flex-shrink:0;
 
+    color:#fff;
+
 }
+
+/* Colors */
 
 .shipments .kpi-icon{
 
-    background:#e0f2fe;
+    background:
+    linear-gradient(135deg,#2563EB,#1D4ED8);
 
 }
 
 .containers .kpi-icon{
 
-    background:#dbeafe;
+    background:
+    linear-gradient(135deg,#0EA5E9,#2563EB);
 
 }
 
 .arrived .kpi-icon{
 
-    background:#dcfce7;
+    background:
+    linear-gradient(135deg,#22C55E,#16A34A);
 
 }
 
 .sea .kpi-icon{
 
-    background:#dbeafe;
+    background:
+    linear-gradient(135deg,#F59E0B,#D97706);
 
 }
+
+/* =========================
+   Content
+========================= */
 
 .kpi-content{
 
@@ -283,11 +454,11 @@ h2{
 
 .kpi-value{
 
-    font-size:42px;
+    font-size:44px;
 
     font-weight:700;
 
-    color:#0f172a;
+    color:var(--navy);
 
     line-height:1;
 
@@ -295,16 +466,44 @@ h2{
 
 .kpi-title{
 
-    margin-top:8px;
+    margin-top:10px;
 
-    color:#64748b;
+    color:var(--sub);
 
     font-size:15px;
 
+    font-weight:500;
+
 }
-/* =========================================
-   Charts
-========================================= */
+
+/* Small Decoration */
+
+.kpi-card::after{
+
+    content:"";
+
+    position:absolute;
+
+    right:-30px;
+
+    bottom:-30px;
+
+    width:120px;
+
+    height:120px;
+
+    background:
+        radial-gradient(
+            rgba(37,99,235,.08),
+            transparent 70%
+        );
+
+    border-radius:50%;
+
+}
+/* =========================
+   Charts Grid
+========================= */
 
 .charts-grid{
 
@@ -312,47 +511,103 @@ h2{
 
     grid-template-columns:repeat(2,1fr);
 
-    gap:20px;
+    gap:24px;
 
-    margin-bottom:30px;
+    margin-bottom:35px;
 
 }
+
+/* =========================
+   Chart Card
+========================= */
 
 .chart-card{
 
-    background:#fff;
-
-    border:1px solid #e5e7eb;
-
-    border-radius:16px;
+    position:relative;
 
     overflow:hidden;
 
-    box-shadow:0 6px 18px rgba(15,23,42,.06);
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    box-shadow:var(--shadow);
+
+    transition:.30s;
 
 }
+
+.chart-card:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 18px 40px rgba(15,23,42,.12);
+
+}
+
+/* Decorative Line */
+
+.chart-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:100%;
+
+    height:5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--emerald)
+        );
+
+}
+
+/* =========================
+   Title
+========================= */
 
 .chart-title{
 
-    padding:16px 20px;
+    display:flex;
 
-    font-size:16px;
+    align-items:center;
 
-    font-weight:600;
+    justify-content:space-between;
 
-    color:#0f172a;
+    padding:20px 24px;
 
-    background:#fafafa;
+    font-size:17px;
 
-    border-bottom:1px solid #e5e7eb;
+    font-weight:700;
+
+    color:var(--navy);
+
+    border-bottom:1px solid var(--border);
+
+    background:#FAFBFC;
 
 }
 
+/* =========================
+   Body
+========================= */
+
 .chart-body{
 
-    height:340px;
+    padding:22px;
 
-    padding:16px;
+    height:360px;
 
 }
 
@@ -363,53 +618,89 @@ h2{
     height:100% !important;
 
 }
+/* =========================
+   Dashboard Sections
+========================= */
 
-/* =========================================
-   Filters
-========================================= */
+section{
 
-.table-toolbar{
+    margin-bottom:45px;
+
+}
+
+section h2{
 
     display:flex;
 
-    flex-wrap:wrap;
+    align-items:center;
 
-    gap:12px;
+    gap:10px;
 
-    margin-bottom:18px;
+    font-size:28px;
+
+    font-weight:700;
+
+    color:var(--navy);
+
+    margin-bottom:22px;
 
 }
+/* =========================
+   Filter Toolbar
+========================= */
+
+.table-toolbar{
+
+    display:grid;
+
+    grid-template-columns:
+        2fr
+        repeat(auto-fit,minmax(180px,1fr));
+
+    gap:16px;
+
+    margin-bottom:24px;
+
+}
+
+/* =========================
+   Search + Select
+========================= */
 
 .table-toolbar input,
 .table-toolbar select{
 
-    height:44px;
+    height:50px;
 
-    padding:0 14px;
+    border:1px solid var(--border);
 
-    border:1px solid #d1d5db;
-
-    border-radius:10px;
+    border-radius:14px;
 
     background:#fff;
 
+    padding:0 18px;
+
     font-size:14px;
 
-    transition:.2s;
+    color:var(--text);
+
+    transition:.25s;
+
+    box-shadow:
+        0 2px 8px rgba(15,23,42,.03);
 
 }
 
-.table-toolbar input{
+.table-toolbar input::placeholder{
 
-    flex:1;
-
-    min-width:260px;
+    color:#94A3B8;
 
 }
 
-.table-toolbar select{
+.table-toolbar input:hover,
+.table-toolbar select:hover{
 
-    min-width:170px;
+    border-color:#CBD5E1;
 
 }
 
@@ -418,50 +709,104 @@ h2{
 
     outline:none;
 
-    border-color:#3b82f6;
+    border-color:var(--blue);
 
-    box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,.12);
 
 }
-/* =========================================
-   Tables
-========================================= */
 
-.table-container{
+/* =========================
+   Search Box
+========================= */
+
+.table-toolbar input{
 
     width:100%;
 
-    overflow-x:auto;
+}
 
-    overflow-y:auto;
+/* =========================
+   Select Arrow
+========================= */
 
-    -webkit-overflow-scrolling:touch;
+.table-toolbar select{
+
+    cursor:pointer;
+
+    appearance:none;
+
+    background-image:
+        linear-gradient(45deg,transparent 50%,#64748B 50%),
+        linear-gradient(135deg,#64748B 50%,transparent 50%);
+
+    background-position:
+
+        calc(100% - 18px) 22px,
+
+        calc(100% - 12px) 22px;
+
+    background-size:6px 6px;
+
+    background-repeat:no-repeat;
+
+}
+/* =========================
+   Toolbar Card
+========================= */
+
+.table-toolbar{
 
     background:#fff;
 
-    border-radius:16px;
+    padding:20px;
 
-    border:1px solid #e5e7eb;
+    border-radius:20px;
 
-    box-shadow:0 6px 18px rgba(15,23,42,.05);
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
 
 }
+/* =========================
+   Table Container
+========================= */
+
+.table-container{
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    overflow:auto;
+
+    box-shadow:var(--shadow);
+
+}
+
+/* =========================
+   Table
+========================= */
 
 table{
 
     width:100%;
 
-    border-collapse:collapse;
+    border-collapse:separate;
 
-    table-layout:auto;
+    border-spacing:0;
+
+    min-width:1200px;
 
 }
 
+/* =========================
+   Header
+========================= */
+
 thead{
-
-    background:#0f172a;
-
-    color:#fff;
 
     position:sticky;
 
@@ -473,225 +818,296 @@ thead{
 
 th{
 
-    padding:14px 12px;
+    background:linear-gradient(
+        180deg,
+        #0F172A,
+        #172554
+    );
 
-    text-align:left;
+    color:#fff;
 
-    font-size:14px;
+    padding:18px 16px;
+
+    font-size:13px;
 
     font-weight:600;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
 
     white-space:nowrap;
 
 }
 
+/* Rounded Header */
+
+th:first-child{
+
+    border-top-left-radius:18px;
+
+}
+
+th:last-child{
+
+    border-top-right-radius:18px;
+
+}
+
+/* =========================
+   Body
+========================= */
+
 td{
 
-    padding:12px;
+    padding:16px;
 
-    font-size:13px;
+    font-size:14px;
 
-    border-bottom:1px solid #edf2f7;
+    color:var(--text);
+
+    border-bottom:1px solid #EEF2F7;
 
     vertical-align:middle;
 
 }
 
+/* Zebra */
+
+tbody tr:nth-child(even){
+
+    background:#FBFCFD;
+
+}
+
+/* Hover */
+
 tbody tr{
 
-    transition:.2s;
+    transition:.25s;
 
 }
 
 tbody tr:hover{
 
-    background:#f8fafc;
+    background:#EEF6FF;
+
+    transform:scale(1.002);
 
 }
 
-/* =========================================
-   Shipment Table
-========================================= */
+/* Last Row */
 
-#shipmentTable{
+tbody tr:last-child td{
 
-    min-width:1200px;
+    border-bottom:none;
 
 }
+/* =========================
+   Table Alignment
+========================= */
 
-#shipmentTable th:nth-child(1),
-#shipmentTable td:nth-child(1){
-
-    width:7%;
-
-}
-
-#shipmentTable th:nth-child(2),
-#shipmentTable td:nth-child(2){
-
-    width:8%;
-
-}
-
-#shipmentTable th:nth-child(3),
-#shipmentTable td:nth-child(3){
-
-    min-width:180px;
-
-    white-space:normal;
-
-}
-
-#shipmentTable th:nth-child(4),
-#shipmentTable td:nth-child(4){
-
-    min-width:320px;
-
-    white-space:normal;
-
-    line-height:1.35;
-
-}
-
-#shipmentTable th:nth-child(5),
-#shipmentTable td:nth-child(5),
-
-#shipmentTable th:nth-child(6),
-#shipmentTable td:nth-child(6),
-
-#shipmentTable th:nth-child(7),
-#shipmentTable td:nth-child(7),
-
-#shipmentTable th:nth-child(8),
-#shipmentTable td:nth-child(8),
-
-#shipmentTable th:nth-child(9),
-#shipmentTable td:nth-child(9){
+td:nth-child(5),
+td:nth-child(6),
+td:nth-child(7),
+td:nth-child(8),
+td:nth-child(9),
+td:nth-child(10){
 
     text-align:center;
 
 }
+/* =========================
+   Scrollbar
+========================= */
 
-/* =========================================
-   Container Table
-========================================= */
+.table-container::-webkit-scrollbar{
 
-#containerTable{
+    height:12px;
 
-    min-width:1500px;
-
-}
-
-#containerTable th{
-
-    white-space:nowrap;
+    width:12px;
 
 }
 
-#containerTable td{
+.table-container::-webkit-scrollbar-track{
 
-    vertical-align:middle;
-
-}
-
-#containerTable th:nth-child(1),
-#containerTable td:nth-child(1){
-
-    min-width:90px;
+    background:#EDF2F7;
 
 }
 
-#containerTable th:nth-child(2),
-#containerTable td:nth-child(2){
+.table-container::-webkit-scrollbar-thumb{
 
-    min-width:70px;
+    background:#94A3B8;
 
-    text-align:center;
-
-}
-
-#containerTable th:nth-child(3),
-#containerTable td:nth-child(3){
-
-    min-width:170px;
+    border-radius:50px;
 
 }
 
-#containerTable th:nth-child(4),
-#containerTable td:nth-child(4){
+.table-container::-webkit-scrollbar-thumb:hover{
 
-    min-width:320px;
+    background:#64748B;
 
-    white-space:normal;
+}
+/* =========================
+   Route Timeline
+========================= */
 
-    line-height:1.35;
+.route-cell{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    line-height:1.8;
 
 }
 
-#containerTable th:nth-child(5),
-#containerTable td:nth-child(5){
+.route-badge{
 
-    min-width:80px;
+    display:flex;
 
-    text-align:center;
+    align-items:center;
+
+    justify-content:center;
+
+    padding:7px 14px;
+
+    border-radius:999px;
+
+    background:#EFF6FF;
+
+    color:#1D4ED8;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    border:1px solid #BFDBFE;
+
+    transition:.25s;
 
 }
 
-#containerTable th:nth-child(6),
-#containerTable td:nth-child(6){
+.route-badge:hover{
+
+    background:#DBEAFE;
+
+}
+
+.route-arrow{
+
+    color:#94A3B8;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+}
+
+/* =========================
+   Current Transit
+========================= */
+
+.current-transit{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
 
     min-width:120px;
 
+    padding:8px 16px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+.current-transit.transit1{
+
+    background:#DBEAFE;
+
+    color:#1D4ED8;
+
+}
+
+.current-transit.transit2{
+
+    background:#FEF3C7;
+
+    color:#B45309;
+
+}
+
+.current-transit.transit3{
+
+    background:#DCFCE7;
+
+    color:#15803D;
+
+}
+
+/* =========================
+   Progress
+========================= */
+
+.progress-bar{
+
+    width:140px;
+
+    height:10px;
+
+    background:#E5E7EB;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+    margin:auto;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    border-radius:999px;
+
+    background:linear-gradient(
+        90deg,
+        #2563EB,
+        #10B981
+    );
+
+    transition:width .4s ease;
+
+}
+
+.progress-text{
+
+    margin-top:6px;
+
     text-align:center;
 
-}
+    font-size:11px;
 
-#containerTable th:nth-child(7),
-#containerTable td:nth-child(7){
+    font-weight:700;
 
-    min-width:150px;
-
-}
-
-#containerTable th:nth-child(8),
-#containerTable td:nth-child(8){
-
-    min-width:150px;
+    color:#64748B;
 
 }
-
-#containerTable th:nth-child(9),
-#containerTable td:nth-child(9){
-
-    min-width:120px;
-
-    text-align:center;
-
-}
-
-#containerTable th:nth-child(10),
-#containerTable td:nth-child(10){
-
-    min-width:160px;
-
-    text-align:center;
-
-}
-
-/* Sort Headers */
-
-#entryHeader,
-#qtyHeader,
-#etaHeader{
-
-    cursor:pointer;
-
-    user-select:none;
-
-}
-/* =========================================
-   Status Badges
-========================================= */
+/* =========================
+   Table Badges
+========================= */
 
 .badge{
 
@@ -701,104 +1117,50 @@ tbody tr:hover{
 
     justify-content:center;
 
-    padding:5px 12px;
+    padding:7px 14px;
 
     border-radius:999px;
 
     font-size:12px;
 
-    font-weight:600;
-
-    white-space:nowrap;
+    font-weight:700;
 
 }
 
-.badge.received{
+.badge.blue{
 
-    background:#dcfce7;
+    background:#DBEAFE;
 
-    color:#15803d;
-
-}
-
-.badge.waiting{
-
-    background:#fee2e2;
-
-    color:#b91c1c;
+    color:#1D4ED8;
 
 }
 
-.badge.distributed{
+.badge.green{
 
-    background:#dbeafe;
+    background:#DCFCE7;
 
-    color:#1d4ed8;
-
-}
-
-.badge.pending{
-
-    background:#fef3c7;
-
-    color:#92400e;
+    color:#15803D;
 
 }
 
-/* =========================================
-   KPI Animation
-========================================= */
+.badge.orange{
 
-.kpi-card{
+    background:#FEF3C7;
 
-    transition:
-        transform .25s,
-        box-shadow .25s;
+    color:#B45309;
 
 }
 
-.kpi-card:hover{
+.badge.red{
 
-    transform:translateY(-4px);
+    background:#FEE2E2;
 
-    box-shadow:0 16px 36px rgba(0,0,0,.10);
-
-}
-
-/* =========================================
-   Scrollbar
-========================================= */
-
-.table-container::-webkit-scrollbar{
-
-    height:10px;
+    color:#B91C1C;
 
 }
-
-.table-container::-webkit-scrollbar-track{
-
-    background:#edf2f7;
-
-    border-radius:20px;
-
-}
-
-.table-container::-webkit-scrollbar-thumb{
-
-    background:#94a3b8;
-
-    border-radius:20px;
-
-}
-
-.table-container::-webkit-scrollbar-thumb:hover{
-
-    background:#64748b;
-
-}
-/* =========================================
+/* =========================
    Responsive
-========================================= */
+========================= */
 
 @media (max-width:1200px){
 
@@ -808,19 +1170,28 @@ tbody tr:hover{
 
     }
 
+    .kpi-grid{
+
+        grid-template-columns:
+            repeat(auto-fit,minmax(260px,1fr));
+
+    }
+
 }
 
 @media (max-width:992px){
 
     .container{
 
-        padding:20px;
+        width:96%;
+
+        padding:22px 0 40px;
 
     }
 
     .header{
 
-        padding:0 18px;
+        padding:0 20px;
 
     }
 
@@ -836,27 +1207,17 @@ tbody tr:hover{
 
     }
 
-    .kpi-grid{
-
-        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-
-    }
-
 }
 
 @media (max-width:768px){
-
-    .container{
-
-        padding:15px;
-
-    }
 
     .navbar{
 
         flex-direction:column;
 
         gap:10px;
+
+        padding:16px;
 
     }
 
@@ -868,7 +1229,7 @@ tbody tr:hover{
 
     .table-toolbar{
 
-        flex-direction:column;
+        grid-template-columns:1fr;
 
     }
 
@@ -878,7 +1239,11 @@ tbody tr:hover{
 
         width:100%;
 
-        min-width:100%;
+    }
+
+    .kpi-grid{
+
+        grid-template-columns:1fr;
 
     }
 
@@ -900,13 +1265,15 @@ tbody tr:hover{
 
     .header{
 
-        height:auto;
-
-        padding:15px;
-
         flex-direction:column;
 
-        gap:10px;
+        justify-content:center;
+
+        gap:12px;
+
+        height:auto;
+
+        padding:18px;
 
     }
 
@@ -930,23 +1297,53 @@ tbody tr:hover{
 
     }
 
-    .kpi-value{
-
-        font-size:34px;
-
-    }
-
     .chart-body{
 
         height:280px;
 
     }
 
+    .kpi-value{
+
+        font-size:34px;
+
+    }
+
+}
+/* =========================
+   Smooth Animations
+========================= */
+
+*{
+
+    scroll-behavior:smooth;
+
 }
 
-/* =========================================
+button,
+input,
+select{
+
+    transition:.25s;
+
+}
+
+canvas{
+
+    user-select:none;
+
+}
+
+::selection{
+
+    background:#2563EB;
+
+    color:#fff;
+
+}
+/* =========================
    Utilities
-========================================= */
+========================= */
 
 .text-center{
 
@@ -971,128 +1368,96 @@ tbody tr:hover{
     display:none !important;
 
 }
-/* ===========================
-   Route Timeline
-=========================== */
 
-.route-cell{
+/* =========================
+   Fade Animation
+========================= */
 
-    white-space:normal;
+@keyframes fadeUp{
 
-    line-height:1.8;
+    from{
 
-}
+        opacity:0;
 
-.route-badge{
+        transform:translateY(15px);
 
-    display:inline-block;
+    }
 
-    padding:6px 12px;
+    to{
 
-    background:#dbeafe;
+        opacity:1;
 
-    color:#1e40af;
+        transform:translateY(0);
 
-    border-radius:20px;
-
-    font-size:12px;
-
-    font-weight:600;
-
-    margin:3px;
+    }
 
 }
 
-.route-arrow{
+.kpi-card,
+.chart-card,
+.table-container{
 
-    color:#64748b;
-
-    font-size:16px;
-
-    margin:0 4px;
+    animation:fadeUp .45s ease;
 
 }
-/* ===========================
-   Current Transit
-=========================== */
+/* =========================================================
+   MULTI-LINE MODEL & QTY CELLS
+========================================================= */
 
-.current-transit{
-
-    display:inline-block;
-
-    padding:7px 14px;
-
-    border-radius:20px;
-
-    font-size:12px;
-
-    font-weight:700;
-
+.multi-line-cell {
+    vertical-align: middle;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
 
-.current-transit.transit1{
-
-    background:#dbeafe;
-
-    color:#1d4ed8;
-
+.multi-line-value {
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    line-height: 1.4;
+    white-space: nowrap;
 }
 
-.current-transit.transit2{
-
-    background:#fef3c7;
-
-    color:#b45309;
-
+.multi-line-value + .multi-line-value {
+    border-top: 1px solid #EEF2F7;
 }
 
-.current-transit.transit3{
 
-    background:#dcfce7;
+/* =========================================================
+   QTY
+========================================================= */
 
-    color:#15803d;
-
-}
-/* ===========================
-   Progress Bar
-=========================== */
-
-.progress-bar{
-
-    width:120px;
-
-    height:8px;
-
-    background:#e5e7eb;
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    margin-bottom:5px;
-
+.qty-cell {
+    text-align: center;
+    font-weight: 600;
+    color: #334155;
 }
 
-.progress-fill{
-
-    height:100%;
-
-    background:linear-gradient(
-        90deg,
-        #2563eb,
-        #22c55e
-    );
-
-    border-radius:20px;
-
+.qty-value {
+    justify-content: center;
 }
 
-.progress-text{
 
-    font-size:11px;
+/* =========================================================
+   MODEL
+========================================================= */
 
-    font-weight:600;
+.multi-line-cell .multi-line-value {
+    font-weight: 500;
+    color: #0F172A;
+}
 
-    color:#475569;
 
+/* =========================================================
+   ROUTE
+========================================================= */
+
+.route-cell {
+    min-width: 280px;
+    vertical-align: middle;
+}
+
+.route-cell .route-badge {
+    white-space: nowrap;
 }
