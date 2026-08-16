@@ -1,566 +1,850 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
-}
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwEgQ6XvXXla4IWM2gpHFfnfI-nRoNMMN0gT_7SS1dmvIOxdFVciZbpN7yRQaR94yq1OA/exec";
 
-body{
-    background:#f5f7fb;
-    color:#222;
-}
+let shipments = [];
 
-/* =========================
-   Header
-========================= */
+let monthChart = null;
+let factoryChart = null;
 
-.header{
+let etaAscending = true;
+let entryAscending = true;
+let qtyAscending = true;
 
-    background:#0f172a;
+// =========================================
+// استخراج عدد الحاويات
+// يدعم:
+// 2X40HQ
+// 3X20GP
+// 1 x 40HQ
+// =========================================
 
-    color:#fff;
+function getContainerCount(value){
 
-    height:88px;
+    const match = String(value || "").match(/\d+/);
 
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    padding:0 28px;
-
-    box-shadow:0 4px 15px rgba(0,0,0,.12);
+    return match ? Number(match[0]) : 0;
 
 }
 
-.header-left,
-.header-right{
+// =========================================
+// Load Data
+// =========================================
 
-    width:80px;
+async function loadData(){
 
-    display:flex;
+    try{
 
-    align-items:center;
+        const response = await fetch(API_URL);
 
-}
+        shipments = await response.json();
 
-.header-center{
+        populateDepartmentFilter(shipments);
 
-    flex:1;
+        populatePOLFilter(shipments);
 
-    text-align:center;
+        populatePODFilter(shipments);
 
-}
+        populateFactoryFilter(shipments);
 
-.header-center h1{
+        applyFilters();
 
-    font-size:30px;
+    }
 
-    font-weight:700;
+    catch(error){
 
-    margin:0;
+        console.error(error);
 
-}
-
-.header-center p{
-
-    margin-top:6px;
-
-    color:#cbd5e1;
-
-    font-size:15px;
-
-}
-
-.menu-btn{
-
-    width:44px;
-
-    height:44px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:rgba(255,255,255,.08);
-
-    color:#fff;
-
-    font-size:22px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-}
-
-.menu-btn:hover{
-
-    background:rgba(255,255,255,.15);
-
-}
-
-/* =========================
-   Navigation
-========================= */
-
-.navbar{
-
-    display:flex;
-
-    justify-content:center;
-
-    gap:14px;
-
-    padding:14px 20px;
-
-    background:#fff;
-
-    border-bottom:1px solid #e5e7eb;
-
-}
-
-.nav-btn{
-
-    border:none;
-
-    background:#f1f5f9;
-
-    color:#1e293b;
-
-    padding:12px 24px;
-
-    border-radius:12px;
-
-    font-size:15px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-}
-
-.nav-btn:hover{
-
-    background:#dbeafe;
-
-    transform:translateY(-2px);
-
-}
-
-.nav-btn.active{
-
-    background:#0f172a;
-
-    color:#fff;
-
-    box-shadow:0 6px 18px rgba(15,23,42,.25);
-
-}
-
-.container{
-
-    width:100%;
-
-    max-width:1500px;
-
-    margin:auto;
-
-    padding:28px;
-
-}
-
-h2{
-    margin-bottom:15px;
-}
-
-/* =========================
-   KPI Cards
-========================= */
-
-.kpi-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-
-    gap:18px;
-
-    margin-bottom:30px;
-
-}
-
-.kpi-card{
-
-    background:#fff;
-
-    border-radius:18px;
-
-    padding:22px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-    border:1px solid #edf2f7;
-
-    box-shadow:0 8px 24px rgba(15,23,42,.06);
-
-    transition:.25s;
-
-}
-
-.kpi-card:hover{
-
-    transform:translateY(-5px);
-
-    box-shadow:0 18px 40px rgba(15,23,42,.12);
-
-}
-
-.kpi-icon{
-
-    width:64px;
-
-    height:64px;
-
-    border-radius:50%;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:30px;
-
-    flex-shrink:0;
-
-}
-
-.shipments .kpi-icon{
-
-    background:#e0f2fe;
-
-}
-
-.containers .kpi-icon{
-
-    background:#dbeafe;
-
-}
-
-.arrived .kpi-icon{
-
-    background:#dcfce7;
-
-}
-
-.sea .kpi-icon{
-
-    background:#e0f2fe;
-
-}
-
-.kpi-content{
-
-    flex:1;
-
-}
-
-.kpi-value{
-
-    font-size:42px;
-
-    font-weight:700;
-
-    color:#0f172a;
-
-    line-height:1;
-
-}
-
-.kpi-title{
-
-    margin-top:8px;
-
-    color:#64748b;
-
-    font-size:15px;
-
-}
-
-.chart{
-    background:#fff;
-    height:260px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin-bottom:25px;
-    font-size:22px;
-    color:#888;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:20px;
-    border:1px solid #ccc;
-    border-radius:8px;
-}
-
-.table-placeholder{
-    background:#fff;
-    height:450px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:22px;
-    color:#888;
-}
-
-.table-toolbar{
-    margin-bottom:15px;
-}
-
-.table-toolbar input{
-    width:100%;
-    height:45px;
-    border:1px solid #dcdcdc;
-    border-radius:10px;
-    padding:0 15px;
-    font-size:15px;
-}
-
-.table-container{
-    width:100%;
-    overflow-x:auto;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-/* =========================
-   Shipments Table
-========================= */
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:auto;
-}
-
-thead{
-    background:#0f172a;
-    color:#fff;
-    position:sticky;
-    top:0;
-    z-index:10;
-}
-
-th,
-td{
-    padding:10px 8px;
-    vertical-align:middle;
-}
-
-th{
-    text-align:left;
-    font-size:14px;
-    font-weight:600;
-    white-space:nowrap;
-}
-
-td{
-    font-size:13px;
-    border-bottom:1px solid #ececec;
-    background:#fff;
-}
-
-tbody tr{
-    transition:.2s;
-}
-
-tbody tr:hover{
-    background:#f7f9fc;
-    cursor:pointer;
-}
-
-/* =========================
-   Column Widths
-========================= */
-
-th:nth-child(1),
-td:nth-child(1){
-    width:6%;
-}
-
-th:nth-child(2),
-td:nth-child(2){
-    width:6%;
-}
-
-th:nth-child(3),
-td:nth-child(3){
-    width:16%;
-    white-space:normal;
-    word-break:break-word;
-    line-height:1.25;
-}
-
-th:nth-child(4),
-td:nth-child(4){
-    width:20%;
-    white-space:normal;
-    word-break:break-word;
-    line-height:1.25;
-}
-
-th:nth-child(5),
-td:nth-child(5){
-    width:7%;
-    text-align:center;
-    white-space:nowrap;
-}
-
-th:nth-child(6),
-td:nth-child(6){
-    width:9%;
-    text-align:center;
-    white-space:nowrap;
-}
-
-th:nth-child(7),
-td:nth-child(7){
-    width:9%;
-    text-align:center;
-    white-space:nowrap;
-}
-
-th:nth-child(8),
-td:nth-child(8){
-    width:5%;
-    text-align:center;
-    white-space:nowrap;
-}
-
-th:nth-child(9),
-td:nth-child(9){
-    width:5%;
-    text-align:center;
-    white-space:nowrap;
-}
-
-#etaHeader,
-#entryHeader,
-#qtyHeader{
-    cursor:pointer;
-}
-/* ===========================
-   Dashboard Charts
-=========================== */
-
-.charts-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:20px;
-
-    margin-bottom:30px;
-
-}
-
-.chart-card{
-
-    background:#fff;
-
-    border:1px solid #e5e7eb;
-
-    border-radius:14px;
-
-    overflow:hidden;
-
-    box-shadow:0 4px 12px rgba(0,0,0,.05);
-
-}
-
-.chart-title{
-
-    padding:16px 20px;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    border-bottom:1px solid #ececec;
-
-    background:#fafafa;
-
-}
-
-.chart-body{
-
-    height:340px;
-
-    padding:15px;
-
-}
-
-.chart-body canvas{
-
-    width:100% !important;
-
-    height:100% !important;
-
-}
-
-/* Mobile */
-
-@media(max-width:900px){
-
-    .charts-grid{
-
-        grid-template-columns:1fr;
+        alert("Unable to load Google Sheets data.");
 
     }
 
 }
-/* =========================
-   Mobile Table
-========================= */
 
-@media (max-width:768px){
+// =========================================
+// Render Table
+// =========================================
 
-    #shipmentTable{
+function renderTable(data){
 
-        min-width:1200px;
+    const tbody =
+        document.querySelector("#shipmentTable tbody");
+
+    tbody.innerHTML = "";
+
+    data.forEach(item=>{
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${item.entry}</td>
+
+            <td>${item.factory}</td>
+
+            <td>${item.model}</td>
+
+            <td>${item.description}</td>
+
+            <td>${Number(item.qty).toLocaleString()}</td>
+
+            <td>${item.etd}</td>
+
+            <td>${item.eta}</td>
+
+            <td>${item.pol}</td>
+
+            <td>${item.pod}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+// =========================================
+// Fill Department Filter
+// =========================================
+
+function populateDepartmentFilter(data){
+
+    const select =
+        document.getElementById("departmentFilter");
+
+    select.innerHTML =
+        '<option value="">All Departments</option>';
+
+    const departments = [...new Set(
+
+        data
+            .map(item => String(item.department || "").trim())
+            .filter(item => item !== "")
+
+    )].sort((a,b)=>a.localeCompare(b));
+
+    departments.forEach(dep=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value = dep;
+
+        option.textContent = dep;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+// =========================================
+// Fill POL Filter
+// =========================================
+
+function populatePOLFilter(data){
+
+    const select =
+        document.getElementById("polFilter");
+
+    select.innerHTML =
+        '<option value="">All POL</option>';
+
+    const values = [...new Set(
+
+        data
+            .map(item => String(item.pol || "").trim())
+            .filter(item => item !== "")
+
+    )].sort((a,b)=>a.localeCompare(b));
+
+    values.forEach(value=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+// =========================================
+// Fill POD Filter
+// =========================================
+
+function populatePODFilter(data){
+
+    const select =
+        document.getElementById("podFilter");
+
+    select.innerHTML =
+        '<option value="">All POD</option>';
+
+    const values = [...new Set(
+
+        data
+            .map(item => String(item.pod || "").trim())
+            .filter(item => item !== "")
+
+    )].sort((a,b)=>a.localeCompare(b));
+
+    values.forEach(value=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+// =========================================
+// Fill Factory Filter
+// =========================================
+
+function populateFactoryFilter(data){
+
+    const select =
+        document.getElementById("factoryFilter");
+
+    select.innerHTML =
+        '<option value="">All Factories</option>';
+
+    const values = [...new Set(
+
+        data
+            .map(item => String(item.factory || "").trim())
+            .filter(item => item !== "")
+
+    )].sort((a,b)=>a.localeCompare(b));
+
+    values.forEach(value=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
+
+}
+// =========================================
+// Search + Filters
+// =========================================
+
+function applyFilters(){
+
+    const keyword =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+    const department =
+        document.getElementById("departmentFilter")
+        .value;
+
+    const pol =
+        document.getElementById("polFilter")
+        .value;
+
+    const pod =
+        document.getElementById("podFilter")
+        .value;
+
+    const factory =
+        document.getElementById("factoryFilter")
+        .value;
+
+    const status =
+        document.getElementById("statusFilter")
+        .value;
+
+    const filtered = shipments.filter(item=>{
+
+        const searchMatch =
+
+            String(item.entry || "").toLowerCase().includes(keyword) ||
+
+            String(item.factory || "").toLowerCase().includes(keyword) ||
+
+            String(item.model || "").toLowerCase().includes(keyword) ||
+
+            String(item.description || "").toLowerCase().includes(keyword) ||
+
+            String(item.department || "").toLowerCase().includes(keyword) ||
+
+            String(item.pol || "").toLowerCase().includes(keyword) ||
+
+            String(item.pod || "").toLowerCase().includes(keyword) ||
+
+            String(item.eta || "").toLowerCase().includes(keyword);
+
+        const departmentMatch =
+
+            department === "" ||
+
+            item.department === department;
+
+        const polMatch =
+
+            pol === "" ||
+
+            item.pol === pol;
+
+        const podMatch =
+
+            pod === "" ||
+
+            item.pod === pod;
+
+        const factoryMatch =
+
+            factory === "" ||
+
+            item.factory === factory;
+
+        const arrived =
+            String(item.bayan || "").trim() !== "";
+
+        const statusMatch =
+
+            status === "" ||
+
+            (status === "sea" && !arrived) ||
+
+            (status === "arrived" && arrived);
+
+        return searchMatch &&
+               departmentMatch &&
+               polMatch &&
+               podMatch &&
+               factoryMatch &&
+               statusMatch;
+
+    });
+
+    renderTable(filtered);
+
+    updateKPIs(filtered);
+
+    drawMonthChart(filtered);
+
+    drawFactoryChart(filtered);
+
+}
+
+// =========================================
+// Event Listeners
+// =========================================
+
+document
+    .getElementById("searchInput")
+    .addEventListener("input", applyFilters);
+
+document
+    .getElementById("departmentFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("polFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("podFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("factoryFilter")
+    .addEventListener("change", applyFilters);
+
+document
+    .getElementById("statusFilter")
+    .addEventListener("change", applyFilters);
+
+loadData();
+// =========================================
+// Sort Entry
+// =========================================
+
+document.getElementById("entryHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return entryAscending
+
+            ? String(a.entry || "").localeCompare(
+                String(b.entry || ""),
+                undefined,
+                {numeric:true}
+            )
+
+            : String(b.entry || "").localeCompare(
+                String(a.entry || ""),
+                undefined,
+                {numeric:true}
+            );
+
+    });
+
+    entryAscending = !entryAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort Qty
+// =========================================
+
+document.getElementById("qtyHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        return qtyAscending
+
+            ? Number(a.qty || 0) - Number(b.qty || 0)
+
+            : Number(b.qty || 0) - Number(a.qty || 0);
+
+    });
+
+    qtyAscending = !qtyAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// Sort ETA
+// =========================================
+
+document.getElementById("etaHeader").addEventListener("click",()=>{
+
+    shipments.sort((a,b)=>{
+
+        const d1 = new Date(a.eta || "");
+
+        const d2 = new Date(b.eta || "");
+
+        return etaAscending
+
+            ? d1 - d2
+
+            : d2 - d1;
+
+    });
+
+    etaAscending = !etaAscending;
+
+    applyFilters();
+
+});
+
+// =========================================
+// KPI Cards
+// =========================================
+
+function updateKPIs(data){
+
+    // =========================
+    // Total Shipments (Unique Entry)
+    // =========================
+
+    const uniqueEntries = new Set(
+
+        data
+            .map(row => String(row.entry || "").trim())
+            .filter(entry => entry !== "")
+
+    );
+
+    document.getElementById("totalShipments").textContent =
+
+        uniqueEntries.size.toLocaleString();
+
+    // =========================
+    // Total Containers
+    // =========================
+
+    const totalContainers = data.reduce((sum,row)=>{
+
+        return sum + getContainerCount(row.hq);
+
+    },0);
+
+    document.getElementById("totalContainers").textContent =
+
+        totalContainers.toLocaleString();
+
+    // =========================
+    // Containers Arrived / On Sea
+    // =========================
+
+    let arrived = 0;
+    let onSea = 0;
+
+    data.forEach(row=>{
+
+        const containers = getContainerCount(row.hq);
+
+        if(String(row.bayan || "").trim() !== ""){
+
+            arrived += containers;
+
+        }else{
+
+            onSea += containers;
+
+        }
+
+    });
+
+    document.getElementById("containersArrived").textContent =
+
+        arrived.toLocaleString();
+
+    document.getElementById("containersOnSea").textContent =
+
+        onSea.toLocaleString();
+
+}
+// =========================================
+// Containers by ETA Month
+// =========================================
+
+function drawMonthChart(data){
+
+    const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    const shipmentsPerMonth = new Array(12).fill(0);
+    const containersPerMonth = new Array(12).fill(0);
+
+    data.forEach(item=>{
+
+        if(!item.eta) return;
+
+        const date = new Date(item.eta);
+
+        if(isNaN(date)) return;
+
+        const month = date.getMonth();
+
+        shipmentsPerMonth[month]++;
+
+        containersPerMonth[month] += getContainerCount(item.hq);
+
+    });
+
+    if(monthChart){
+
+        monthChart.destroy();
 
     }
 
-    #shipmentTable th,
-    #shipmentTable td{
+    monthChart = new Chart(
 
-        white-space:nowrap;
+        document.getElementById("monthChart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:months,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsPerMonth,
+
+                    containers:containersPerMonth,
+
+                    backgroundColor:"rgba(54,162,235,0.25)",
+
+                    borderColor:"rgba(54,162,235,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:40
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        grid:{
+                            display:false
+                        }
+
+                    },
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+                            precision:0
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+// =========================================
+// Top 3 Factories Chart
+// =========================================
+
+function drawFactoryChart(data){
+
+    const factories = {};
+
+    data.forEach(item=>{
+
+        const factory = String(item.factory || "").trim();
+
+        if(factory === "") return;
+
+        if(!factories[factory]){
+
+            factories[factory] = {
+
+                shipments:0,
+
+                containers:0
+
+            };
+
+        }
+
+        factories[factory].shipments++;
+
+        factories[factory].containers += getContainerCount(item.hq);
+
+    });
+
+    const sorted = Object.entries(factories)
+
+        .sort((a,b)=>{
+
+            if(b[1].shipments !== a[1].shipments){
+
+                return b[1].shipments - a[1].shipments;
+
+            }
+
+            return a[0].localeCompare(b[0]);
+
+        })
+
+        .slice(0,3);
+
+    const labels = sorted.map(item=>item[0]);
+
+    const shipmentsCount = sorted.map(item=>item[1].shipments);
+
+    const containersCount = sorted.map(item=>item[1].containers);
+
+    if(factoryChart){
+
+        factoryChart.destroy();
 
     }
 
-    #shipmentTable td:nth-child(3),
-    #shipmentTable td:nth-child(4){
+    factoryChart = new Chart(
 
-        white-space:normal;
-        min-width:260px;
-        line-height:1.35;
+        document.getElementById("factoryChart"),
 
-    }
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[{
+
+                    label:"Shipments",
+
+                    data:shipmentsCount,
+
+                    containers:containersCount,
+
+                    backgroundColor:"rgba(75,192,192,.25)",
+
+                    borderColor:"rgba(75,192,192,1)",
+
+                    borderWidth:1,
+
+                    borderRadius:6,
+
+                    maxBarThickness:28
+
+                }]
+
+            },
+
+            options:{
+
+                indexAxis:"y",
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                interaction:{
+
+                    intersect:false,
+
+                    mode:"index"
+
+                },
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            title:function(context){
+
+                                return context[0].label;
+
+                            },
+
+                            label:function(context){
+
+                                return "Shipments : " + context.raw;
+
+                            },
+
+                            afterLabel:function(context){
+
+                                return "Containers : " +
+                                    context.dataset.containers[context.dataIndex];
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+
+                            precision:0
+
+                        }
+
+                    },
+
+                    y:{
+
+                        grid:{
+
+                            display:false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
 
 }
