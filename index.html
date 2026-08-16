@@ -5,66 +5,35 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Logistics Control Tower</title>
 
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
+    <!-- Header -->
 
-<header class="header">
+    <header class="header">
 
     <div class="header-left">
 
-        <button
-            class="menu-btn"
-            id="menuBtn"
-            type="button"
-            aria-label="Menu"
-        >
+        <button class="menu-btn" id="menuBtn">
             ☰
         </button>
 
     </div>
 
-
     <div class="header-center">
 
-        <h1>
-            Logistics Control Tower
-        </h1>
+        <h1>الشركة الأساسية للإلكترونيات المحدودة</h1>
 
-        <p>
-            الشركة الأساسية للإلكترونيات المحدودة
-        </p>
+        <p>قسم اللوجستيك</p>
 
     </div>
-
 
     <div class="header-right">
 
@@ -72,532 +41,203 @@
 
 </header>
 
+    <!-- Navigation -->
 
-<!-- =====================================================
-     NAVIGATION
-===================================================== -->
+     <nav class="navbar">
 
-<nav class="navbar">
+       <button class="nav-btn active">
+          📊 Dashboard
+       </button>
 
-    <button
-        class="nav-btn active"
-        id="dashboardBtn"
-        type="button"
-    >
-        📊 Dashboard
-    </button>
+       <button class="nav-btn">
+          🚚 Shipments
+       </button>
 
+       <button class="nav-btn">
+          📦 Models
+       </button>
+ 
+       <button class="nav-btn">
+          ⚙️ Settings
+       </button>
 
-    <button
-        class="nav-btn"
-        id="containersBtn"
-        type="button"
-    >
-        🚢 Containers Status
-    </button>
+    </nav>
 
-</nav>
+    <!-- Main -->
 
+    <main class="container">
 
-<!-- =====================================================
-     MAIN
-===================================================== -->
+        <!-- Dashboard -->
 
-<main class="container">
+        <section>
 
-    <!-- =====================================================
-     DASHBOARD
-===================================================== -->
+            <h2>Dashboard</h2>
 
-<section id="dashboardPage">
+            <!-- KPI Cards -->
 
-    <h2>Dashboard Overview</h2>
+<div class="kpi-grid">
 
+    <div class="kpi-card shipments">
 
-    <!-- =================================================
-         DASHBOARD KPI
-    ================================================== -->
+        <div class="kpi-icon">📦</div>
 
-    <div class="kpi-grid">
+        <div class="kpi-content">
 
-        <!-- Total Shipments -->
+            <div class="kpi-value" id="totalShipments">0</div>
 
-        <div class="kpi-card shipments">
-
-            <div class="kpi-icon">
-                📦
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="totalShipments"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Total Shipments
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Total Containers -->
-
-        <div class="kpi-card containers">
-
-            <div class="kpi-icon">
-                🚢
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="totalContainers"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Total Containers
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Containers Arrived -->
-
-        <div class="kpi-card arrived">
-
-            <div class="kpi-icon">
-                ✅
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="containersArrived"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Containers Arrived
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Containers On Sea -->
-
-        <div class="kpi-card sea">
-
-            <div class="kpi-icon">
-                🌊
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="containersOnSea"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Containers On Sea
-                </div>
-
-            </div>
+            <div class="kpi-title">Total Shipments</div>
 
         </div>
 
     </div>
 
+    <div class="kpi-card containers">
 
-    <!-- =================================================
-         DASHBOARD CHARTS
-    ================================================== -->
+        <div class="kpi-icon">🚢</div>
 
-    <div class="charts-grid">
+        <div class="kpi-content">
 
+            <div class="kpi-value" id="totalContainers">0</div>
 
-        <!-- Containers by ETA Month -->
-
-        <div class="chart-card">
-
-            <div class="chart-title">
-                Containers by ETA Month
-            </div>
-
-            <div class="chart-body">
-
-                <canvas
-                    id="monthChart"
-                ></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- Top 3 Factories -->
-
-        <div class="chart-card">
-
-            <div class="chart-title">
-                Top 3 Factories
-            </div>
-
-            <div class="chart-body">
-
-                <canvas
-                    id="factoryChart"
-                ></canvas>
-
-            </div>
+            <div class="kpi-title">Total Containers</div>
 
         </div>
 
     </div>
 
+    <div class="kpi-card arrived">
 
-    <!-- =================================================
-         SHIPMENTS
-    ================================================== -->
+        <div class="kpi-icon">✅</div>
 
-    <section id="shipmentsSection">
+        <div class="kpi-content">
 
-        <h2>Shipments</h2>
+            <div class="kpi-value" id="containersArrived">0</div>
 
-
-        <!-- Filters -->
-
-        <div class="table-toolbar">
-
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Search Entry, Factory, Model, Description..."
-            >
-
-
-            <select id="departmentFilter">
-
-                <option value="">
-                    All Departments
-                </option>
-
-            </select>
-
-
-            <select id="polFilter">
-
-                <option value="">
-                    All POL
-                </option>
-
-            </select>
-
-
-            <select id="podFilter">
-
-                <option value="">
-                    All POD
-                </option>
-
-            </select>
-
-
-            <select id="factoryFilter">
-
-                <option value="">
-                    All Factories
-                </option>
-
-            </select>
-
-
-            <select id="statusFilter">
-
-                <option value="">
-                    All Shipments
-                </option>
-
-                <option value="sea">
-                    🚢 On Sea
-                </option>
-
-                <option value="arrived">
-                    ✅ Arrived
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <!-- Shipments Table -->
-
-        <div class="table-container">
-
-            <table id="shipmentTable">
-
-                <thead>
-
-                    <tr>
-
-                        <th id="entryHeader">
-                            Entry
-                        </th>
-
-                        <th>
-                            Factory
-                        </th>
-
-                        <th>
-                            Model
-                        </th>
-
-                        <th>
-                            Description
-                        </th>
-
-                        <th id="qtyHeader">
-                            Qty
-                        </th>
-
-                        <th>
-                            ETD
-                        </th>
-
-                        <th id="etaHeader">
-                            ETA
-                        </th>
-
-                        <th>
-                            POL
-                        </th>
-
-                        <th>
-                            POD
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-</section>
-<!-- =====================================================
-     CONTAINERS STATUS
-===================================================== -->
-
-<section
-    id="containersPage"
-    style="display:none;"
->
-
-    <h2>Containers Status</h2>
-
-
-    <!-- =================================================
-         CONTAINERS KPI
-    ================================================== -->
-
-    <div class="kpi-grid">
-
-
-        <!-- Total Containers -->
-
-        <div class="kpi-card shipments">
-
-            <div class="kpi-icon">
-                🚢
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="containerTotal"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Total Containers
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Destination Ports -->
-
-        <div class="kpi-card arrived">
-
-            <div class="kpi-icon">
-                ⚓
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="destinationPorts"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Destination Ports
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Arriving This Month -->
-
-        <div class="kpi-card sea">
-
-            <div class="kpi-icon">
-                📅
-            </div>
-
-            <div class="kpi-content">
-
-                <div
-                    class="kpi-value"
-                    id="arrivingMonth"
-                >
-                    0
-                </div>
-
-                <div class="kpi-title">
-                    Arriving This Month
-                </div>
-
-            </div>
+            <div class="kpi-title">Containers Arrived</div>
 
         </div>
 
     </div>
 
+    <div class="kpi-card sea">
 
-    <!-- =================================================
-         DESTINATION CHART
-    ================================================== -->
+        <div class="kpi-icon">🌊</div>
 
-    <div class="charts-grid">
+        <div class="kpi-content">
 
+            <div class="kpi-value" id="containersOnSea">0</div>
 
-        <div class="chart-card">
-
-            <div class="chart-title">
-                Containers by Destination Port
-            </div>
-
-            <div class="chart-body">
-
-                <canvas
-                    id="warehouseStatusChart"
-                ></canvas>
-
-            </div>
+            <div class="kpi-title">Containers On Sea</div>
 
         </div>
 
-
-
     </div>
 
+</div>
 
-<!-- =====================================================
-     CONTAINER DETAILS
-===================================================== -->
+                        <!-- Charts -->
 
-<section id="containersSection">
+            <div class="charts-grid">
 
-    <h2>Container Details</h2>
+                <!-- Containers by Month -->
 
-    <!-- Filters -->
+                <div class="chart-card">
+
+                    <div class="chart-title">
+                        Containers by ETA Month
+                    </div>
+
+                    <div class="chart-body">
+
+                        <canvas id="monthChart"></canvas>
+
+                    </div>
+
+                </div>
+
+                <!-- Top 3 Factories -->
+
+                <div class="chart-card">
+
+                    <div class="chart-title">
+                        Top 3 Factories
+                    </div>
+
+                    <div class="chart-body">
+
+                        <canvas id="factoryChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+<!-- Shipments -->
+
+<section>
+
+    <h2>Shipments</h2>
 
     <div class="table-toolbar">
 
         <input
             type="text"
-            id="containerSearch"
-            placeholder="Search Entry, S/N, Container, Model, QTY..."
-        >
+            id="searchInput"
+            placeholder="Search Entry, Factory, Model, ETA...">
 
-        <select id="transitFilter">
-
-            <option value="">
-                All Transit
-            </option>
-
+        <select id="departmentFilter">
+            <option value="">All Departments</option>
         </select>
 
-        <select id="podContainerFilter">
-
-            <option value="">
-                All Destinations
-            </option>
-
+        <select id="polFilter">
+            <option value="">All POL</option>
         </select>
 
-        <input
-            type="date"
-            id="etaContainerFilter"
-        >
+        <select id="podFilter">
+            <option value="">All POD</option>
+        </select>
+
+        <select id="factoryFilter">
+            <option value="">All Factories</option>
+        </select>
+
+        <select id="statusFilter">
+            <option value="">All Shipments</option>
+            <option value="sea">🚢 On Sea</option>
+            <option value="arrived">✅ Arrived</option>
+        </select>
 
     </div>
 
-
-    <!-- Container Table -->
-
     <div class="table-container">
 
-        <table id="containerTable">
+        <table id="shipmentTable">
+
+            <colgroup>
+                <col style="width:7%">
+                <col style="width:8%">
+                <col style="width:18%">
+                <col style="width:34%">
+                <col style="width:8%">
+                <col style="width:9%">
+                <col style="width:9%">
+                <col style="width:4%">
+                <col style="width:3%">
+            </colgroup>
 
             <thead>
 
                 <tr>
 
-                    <th>
-                        Entry
+                    <th id="entryHeader" style="cursor:pointer;">
+                        Entry ▲
                     </th>
 
                     <th>
-                        S/N
-                    </th>
-
-                    <th>
-                        Container
+                        Factory
                     </th>
 
                     <th>
@@ -605,19 +245,27 @@
                     </th>
 
                     <th>
-                        QTY
+                        Description
+                    </th>
+
+                    <th id="qtyHeader" style="cursor:pointer;">
+                        Qty ▲
                     </th>
 
                     <th>
-                        Route
+                        ETD
+                    </th>
+
+                    <th id="etaHeader" style="cursor:pointer;">
+                        ETA ▲
                     </th>
 
                     <th>
-                        Destination
+                        POL
                     </th>
 
                     <th>
-                        ETA
+                        POD
                     </th>
 
                 </tr>
@@ -633,41 +281,16 @@
     </div>
 
 </section>
-<!-- =====================================================
-     FOOTER
-===================================================== -->
 
 </main>
 
+    <!-- Chart.js -->
 
-<footer
-    style="
-        text-align:center;
-        padding:28px 20px;
-        color:#64748B;
-        font-size:13px;
-    "
->
-    © 2026 Logistics Control Tower. All rights reserved.
-</footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Main Script -->
 
-<!-- =====================================================
-     CHART.JS
-===================================================== -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/chart.js">
-</script>
-
-
-<!-- =====================================================
-     APPLICATION SCRIPT
-===================================================== -->
-
-<script
-    src="script.js">
-</script>
+    <script src="script.js"></script>
 
 </body>
 
